@@ -1,6 +1,84 @@
 # LEGO
 
-Aliexpres extract
+## Lego Gallery
+
+<div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
+  <a href="Lego_City.md" style="color: white; text-decoration: none;">LEGO CITY</a>
+</div>
+
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_City.md#️-intercoastal-seaport">
+      <img src="images/8541.jpg" alt="🛳️ Intercoastal Seaport" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>🛳️ Intercoastal Seaport</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_City.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Dark Mode" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>Dark Mode</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_City.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Hugh Contrast" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>High Contrast</sub></div>
+  </div>
+</div>
+
+<div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
+  <a href="Lego_System.md" style="color: white; text-decoration: none;">LEGO SYSTEM</a>
+</div>
+
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_System.md#️-intercoastal-seaport">
+      <img src="images/5542.jpg" alt="🚁 Black Thunder" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>🚁 Black Thunder</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_System.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Dark Mode" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>Dark Mode</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_System.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Hugh Contrast" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>High Contrast</sub></div>
+  </div>
+</div>
+
+<div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
+  <a href="Lego_Technic.md" style="color: white; text-decoration: none;">LEGO TECHNIC</a>
+</div>
+
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_Technic.md#️-safari-racer">
+      <img src="images/8840.png" alt="🏎️ Safari Racer" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>🏎️ Safari Racer</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_Technic.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Dark Mode" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>Dark Mode</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_Technic.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Hugh Contrast" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>High Contrast</sub></div>
+  </div>
+</div>
+
+
+## Lego Shopping List
 
 - [lego wedo 2 0 set - Buy lego wedo 2 0 set with free shipping on AliExpress](https://www.aliexpress.com/w/wholesale-lego-wedo-2-0-set.html?spm=a2g0o.productlist.discover_more.9.71e0a2ceD9n4xz)
 
@@ -8,22 +86,6 @@ Aliexpres extract
 - [NEW WeDo 2nd Generation Robotics Construction STEAM for Scratch 3.0 Core Set Building Blocks Technical Brick Educational Toy - AliExpress 26](https://www.aliexpress.com/item/1005007003420271.html?spm=a2g0o.detail.pcDetailTopMoreOtherSeller.3.28dbmGWwmGWweL&gps-id=pcDetailTopMoreOtherSeller&scm=1007.40050.354490.0&scm_id=1007.40050.354490.0&scm-url=1007.40050.354490.0&pvid=0bed0b72-6fb0-4b05-930d-8c957bf8ef4b&_t=gps-id:pcDetailTopMoreOtherSeller,scm-url:1007.40050.354490.0,pvid:0bed0b72-6fb0-4b05-930d-8c957bf8ef4b,tpp_buckets:668%232846%238114%231999&pdp_npi=4%40dis%21CZK%211132.21%21551.91%21%21%21345.09%21168.22%21%40210385a817272031576862024ee84b%2112000039015994127%21rec%21CZ%212302846117%21ACX&utparam-url=scene%3ApcDetailTopMoreOtherSeller%7Cquery_from%3A)
 - [NEW Educational and Dacta Mindstorms WeDo Building Blocks Kit WeDo 2.0 Core Set Compatible 45300 STEAM DIY Bricks Toy Xmas Gifts - AliExpress 26](https://www.aliexpress.com/item/1005005873249719.html?spm=a2g0o.productlist.main.31.2691EsT4EsT4PD&algo_pvid=6825c71f-26b5-4105-9aaf-72ae50961c56&aem_p4p_detail=2024092411385210519601914431480010345980&algo_exp_id=6825c71f-26b5-4105-9aaf-72ae50961c56-15&pdp_npi=4%40dis%21CZK%214220.12%211180.82%21%21%211286.27%21359.91%21%40211b8f9b17272031328455003ef76f%2112000034663597159%21sea%21CZ%212302846117%21ACX&curPageLogUid=7unfJglHhwu8&utparam-url=scene%3Asearch%7Cquery_from%3A&search_p4p_id=2024092411385210519601914431480010345980_4)
 
-## 🛳️ Intercoastal Seaport
-
-[LEGO Set 6541 Intercoastal Seaport, Town - Boats](https://lego.brickinstructions.com/lego_instructions/set/6541/Intercoastal_Seaport)
-
-
-## 🚁 System
-
-- [LEGO Set 5542-1 Black Thunder (1998 Model Team) | Rebrickable - Build with LEGO](https://rebrickable.com/sets/5542-1/black-thunder/?inventory=1#buy_set)
-
-
-## 🤖 Technic
-
-[LEGO Technic | Brickset](https://brickset.com/sets/theme-Technic)
-
-- [Lego Set 8840 Safari Racer](https://manuall.co.uk/lego-set-8840-technic-safari-racer/)
-- [LEGO Set 8840-1 Rally Shock n' Roll Racer (1991 Technic)](https://rebrickable.com/sets/8840-1/rally-shock-n-roll-racer/?inventory=2#parts)
 
 
 ## Part catalog

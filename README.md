@@ -2,7 +2,11 @@
 
 ## 🏠 [Domy, prostory](./arch/README.md)
 
-## 🧱 [Stavíme Lego](./brick/README.md)
+## Hrajeme si
+
+### 🚂 [Stavíme Brio](./brio/README.md)
+
+### 🧱 [Stavíme Lego a další](./brick/README.md)
 
 
 

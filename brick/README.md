@@ -3,8 +3,36 @@
 ## Lego Gallery
 
 <div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
-  <a href="Lego_City.md" style="color: white; text-decoration: none;">LEGO CITY</a>
+  <a href="Lego_City.md" style="color: white; text-decoration: none;">LEGO Creator</a>
 </div>
+
+
+<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_Creator.md#-flatbed-truck">
+      <img src="images/31146.jpg" alt="🚛 Flatbed Truck" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>🚛 Flatbed Truck</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_City.md#-rescue-helicoper-transport">
+      <img src="images/.jpg" alt=" Transport" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub> Transport</sub></div>
+  </div>
+  <div style="text-align: center; max-width: 200px;">
+    <a href="Lego_City.md#️-intercoastal-seaport">
+      <img src="images/.jpg" alt="🛳️ Hugh Contrast" style="width: 100%; border-radius: 8px;"/>
+    </a>
+    <div><sub>High Contrast</sub></div>
+  </div>
+</div>
+
+
+<div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
+  <a href="Lego_City.md" style="color: white; text-decoration: none;">LEGO City</a>
+</div>
+
 
 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
   <div style="text-align: center; max-width: 200px;">
@@ -14,10 +42,10 @@
     <div><sub>🛳️ Intercoastal Seaport</sub></div>
   </div>
   <div style="text-align: center; max-width: 200px;">
-    <a href="Lego_City.md#️-intercoastal-seaport">
-      <img src="images/.jpg" alt="🛳️ Dark Mode" style="width: 100%; border-radius: 8px;"/>
+    <a href="Lego_City.md#-rescue-helicoper-transport">
+      <img src="images/60343.jpg" alt="🚁 Rescue Transport" style="width: 100%; border-radius: 8px;"/>
     </a>
-    <div><sub>Dark Mode</sub></div>
+    <div><sub>🚁 Rescue Transport</sub></div>
   </div>
   <div style="text-align: center; max-width: 200px;">
     <a href="Lego_City.md#️-intercoastal-seaport">
@@ -64,10 +92,10 @@
     <div><sub>🏎️ Safari Racer</sub></div>
   </div>
   <div style="text-align: center; max-width: 200px;">
-    <a href="Lego_Technic.md#️-intercoastal-seaport">
-      <img src="images/.jpg" alt="🛳️ Dark Mode" style="width: 100%; border-radius: 8px;"/>
+    <a href="Lego_Technic.md#-dump-truck">
+      <img src="images/42147.jpg" alt="🚚 Dump Truck" style="width: 100%; border-radius: 8px;"/>
     </a>
-    <div><sub>Dark Mode</sub></div>
+    <div><sub>🚚 Dump Truck</sub></div>
   </div>
   <div style="text-align: center; max-width: 200px;">
     <a href="Lego_Technic.md#️-intercoastal-seaport">

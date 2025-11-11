@@ -2,12 +2,8 @@
 
 ## 🏠 [Domy, prostory](./arch/README.md)
 
-## Stavebnice
+## 🧱 [Stavebnice](./brick/README.md)
 
-### 🚂 [Stavíme Brio](./brio/README.md)
+## 🎲 [Společenské hry](./table/README.md)
 
-### 🧱 [Stavíme Lego a další](./brick/README.md)
-
-## [Společenské hry](./table/README.md)
-
-## [Digitální hry](./games/README.md)
+## 🎮 [Digitální hry](./games/README.md)

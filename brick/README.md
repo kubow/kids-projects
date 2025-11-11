@@ -1,6 +1,10 @@
-# LEGO
+# Brick-based
 
-## Lego Gallery
+## [Brio](./brio.md)
+
+## [Seva](Seva.md)
+
+## Lego
 
 <div style="text-align: center; padding: 10px; font-weight: bold; background-color: rgb(88, 81, 81); color: white; margin: 20px auto; border-radius: 6px; max-width: 90%;">
   <a href="Lego_City.md" style="color: white; text-decoration: none;">LEGO Creator</a>

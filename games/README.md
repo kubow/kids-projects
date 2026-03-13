@@ -1,3 +1,15 @@
+## Minecraft Pi Edition – Streamlit API UI
+
+A **Streamlit app** in this folder provides a web UI for the [Minecraft Pi Edition API](https://pimylifeup.com/minecraft-pi-edition-api-reference/): connect to Minecraft Pi (or RaspberryJuice), place **predefined builds** (house, tower, pyramid, sphere, etc.), and use block/player/chat/camera controls.
+
+**Run from repo root** (requirements in root):
+```bash
+source venv/bin/activate && pip install -r requirements.txt && streamlit run games/app.py
+```
+
+Uses [mcpi](https://pypi.org/project/mcpi/) and [minecraftstuff](https://pypi.org/project/minecraftstuff/) for shapes (spheres, circles, lines).
+
+---
 
 ## Minecraft
 

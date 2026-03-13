@@ -83,11 +83,58 @@ BLOCK_REF = {
 
 with tab_world:
     st.subheader("World / blocks")
-    with st.expander("Block ID reference (common)"):
+    with st.expander("Block ID reference (common) & seed blocks"):
         st.caption("Full list: [Pi My Life Up API reference](https://pimylifeup.com/minecraft-pi-edition-api-reference/)")
         cols = st.columns(4)
         for i, (name, bid) in enumerate(BLOCK_REF.items()):
             cols[i % 4].code(f"{name}: {bid}")
+        st.divider()
+        st.markdown("**Seed blocks around the map** — scatter a selected block at random positions in an area.")
+        if mc:
+            seed_block_label = st.selectbox(
+                "Block to seed",
+                options=list(BLOCK_REF.keys()),
+                key="seed_block_select",
+            )
+            seed_block_id = BLOCK_REF[seed_block_label]
+            use_player_center = st.checkbox("Center area on player position", value=True, key="seed_use_player")
+            if use_player_center:
+                try:
+                    p = mc.player.getTilePos()
+                    seed_cx, seed_cz = p.x, p.z
+                except Exception:
+                    seed_cx, seed_cz = 0, 0
+            else:
+                seed_cx = st.number_input("Center X", value=0, key="seed_cx")
+                seed_cz = st.number_input("Center Z", value=0, key="seed_cz")
+            seed_radius = st.slider("Radius (blocks) from center", min_value=5, max_value=80, value=20, key="seed_radius")
+            seed_count = st.number_input("Number of blocks to place", min_value=1, max_value=500, value=30, key="seed_count")
+            seed_at_surface = st.checkbox("Place on surface (use getHeight)", value=True, key="seed_at_surface")
+            if not seed_at_surface:
+                seed_fixed_y = st.number_input("Fixed Y level", value=0, key="seed_fixed_y")
+            else:
+                seed_fixed_y = 0
+            if st.button("Seed blocks", type="primary", key="seed_btn"):
+                import random
+                placed = 0
+                for _ in range(int(seed_count)):
+                    rx = seed_cx + random.randint(-seed_radius, seed_radius)
+                    rz = seed_cz + random.randint(-seed_radius, seed_radius)
+                    if seed_at_surface:
+                        try:
+                            ry = mc.getHeight(rx, rz)
+                        except Exception:
+                            ry = 0
+                    else:
+                        ry = int(seed_fixed_y)
+                    try:
+                        mc.setBlock(rx, ry, rz, seed_block_id, 0)
+                        placed += 1
+                    except Exception:
+                        pass
+                st.success(f"Placed **{placed}** blocks of **{seed_block_label}** in the area.")
+        else:
+            st.caption("Connect to Minecraft to seed blocks.")
     if mc:
         c1, c2 = st.columns(2)
         with c1:
@@ -183,9 +230,19 @@ with tab_builds:
                     default_x, default_y, default_z = 0, 0, 0
             else:
                 default_x, default_y, default_z = 0, 0, 0
-            bx = st.number_input("Position X", value=default_x, key="build_x")
-            by = st.number_input("Position Y", value=default_y, key="build_y")
-            bz = st.number_input("Position Z", value=default_z, key="build_z")
+            # Sync button: refresh position from player and store in session state
+            if st.button("Sync with current position", help="Update X, Y, Z to your current tile position"):
+                try:
+                    pos = mc.player.getTilePos()
+                    st.session_state["build_x"] = pos.x
+                    st.session_state["build_y"] = pos.y
+                    st.session_state["build_z"] = pos.z
+                    st.rerun()
+                except Exception as e:
+                    st.error(str(e))
+            bx = st.number_input("Position X", value=st.session_state.get("build_x", default_x), key="build_x")
+            by = st.number_input("Position Y", value=st.session_state.get("build_y", default_y), key="build_y")
+            bz = st.number_input("Position Z", value=st.session_state.get("build_z", default_z), key="build_z")
 
             extra = {}
             for param_name, param_type, default, label in build.get("params", []):
@@ -204,13 +261,11 @@ with tab_builds:
 with tab_chat:
     st.subheader("Chat")
     if mc:
-        msg = st.text_input("Message to post in game chat")
-        if st.button("Post to chat"):
-            if msg:
-                mc.postToChat(msg)
-                st.success("Posted")
-            else:
-                st.warning("Enter a message")
+        st.caption("Type a message and press **Enter** to post in game chat.")
+        prompt = st.chat_input("Message to post in game chat")
+        if prompt:
+            mc.postToChat(prompt)
+            st.success("Posted to chat")
     else:
         st.info("Connect to Minecraft first.")
 

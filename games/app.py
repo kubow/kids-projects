@@ -7,9 +7,31 @@ player, place predefined builds, post to chat, and more.
 API reference: https://pimylifeup.com/minecraft-pi-edition-api-reference/
 """
 
+from pathlib import Path
+
 import streamlit as st
 
 from builds import BUILDS, get_build, build_terrarium, populate_terrarium_mobs
+
+# Image references (no generation): local assets or URLs. Add images to games/assets/ (see assets/README.md).
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+
+def _block_image_path(block_key: str) -> Path:
+    """Path to block image: assets/blocks/{key}.png (e.g. Stone.png, Sugar_cane.png)."""
+    name = block_key.replace(" ", "_") + ".png"
+    return ASSETS_DIR / "blocks" / name
+
+def _build_image_path(build_id: str) -> Path:
+    """Path to build image: assets/builds/{build_id}.png (e.g. simple_house.png)."""
+    return ASSETS_DIR / "builds" / f"{build_id}.png"
+
+def _show_image_if_exists(path: Path, width: int = 80, caption: str = ""):
+    """Show image with st.image if file exists."""
+    if path.exists():
+        try:
+            st.image(str(path), width=width, caption=caption or None)
+        except Exception:
+            pass
 
 # Page config
 st.set_page_config(
@@ -73,12 +95,48 @@ tab_world, tab_player, tab_builds, tab_terrarium, tab_chat, tab_camera, tab_bloc
     "World (blocks)", "Player", "Predefined builds", "Terrarium", "Chat", "Camera", "Block events",
 ])
 
-# Common block IDs (Minecraft Pi / API reference)
+# Block IDs (Minecraft Pi / API reference). Includes plants and special blocks.
 BLOCK_REF = {
     "Air": 0, "Stone": 1, "Grass": 2, "Dirt": 3, "Cobblestone": 4,
-    "Wood planks": 5, "Glass": 20, "Wool": 35, "Brick": 45, "TNT": 46,
-    "Bookshelf": 47, "Torch": 50, "Wood": 17, "Glowstone": 89,
-    "Sandstone": 24, "Gold block": 41, "Iron block": 42, "Diamond block": 57,
+    "Wood planks": 5, "Sapling": 6, "Wood": 17, "Leaves": 18, "Glass": 20,
+    "Wool": 35, "Yellow flower": 37, "Cyan flower": 38, "Brown mushroom": 39, "Red mushroom": 40,
+    "Gold block": 41, "Iron block": 42, "Brick": 45, "TNT": 46, "Bookshelf": 47, "Torch": 50,
+    "Sandstone": 24, "Diamond block": 57, "Sugar cane": 83, "Cactus": 81, "Clay": 82,
+    "Tall grass": 31, "Melon": 103, "Glowstone": 89, "Snow": 78, "Ice": 79,
+}
+
+# Emoji icons for block list (visual representation)
+BLOCK_ICONS = {
+    "Air": "⬜", "Stone": "🪨", "Grass": "🌿", "Dirt": "🟫", "Cobblestone": "🪨",
+    "Wood planks": "🪵", "Sapling": "🌱", "Wood": "🪵", "Leaves": "🍃", "Glass": "🪟",
+    "Wool": "🧶", "Yellow flower": "🌸", "Cyan flower": "💠", "Brown mushroom": "🍄", "Red mushroom": "🍄",
+    "Gold block": "🟨", "Iron block": "⬜", "Brick": "🧱", "TNT": "🧨", "Bookshelf": "📚", "Torch": "🔦",
+    "Sandstone": "🟨", "Diamond block": "💎", "Sugar cane": "🫚", "Cactus": "🌵", "Clay": "🟤",
+    "Tall grass": "🌾", "Melon": "🍈", "Glowstone": "✨", "Snow": "❄️", "Ice": "🧊",
+}
+
+def _block_display_options():
+    """Options for selectbox: emoji + name."""
+    return [f"{BLOCK_ICONS.get(n, '⬜')} {n}" for n in BLOCK_REF.keys()]
+
+def _block_label_to_key(label):
+    """From '🪨 Stone' to 'Stone'."""
+    for k in BLOCK_REF:
+        if label == f"{BLOCK_ICONS.get(k, '⬜')} {k}":
+            return k
+    for k in BLOCK_REF:
+        if label.endswith(" " + k):
+            return k
+    return list(BLOCK_REF.keys())[0]
+
+# Build icons for predefined builds (visual representation)
+BUILD_ICONS = {
+    "simple_house": "🏠", "tower": "🗼", "wall": "🧱", "pyramid": "🔺", "platform": "📦",
+    "pillar": "🪵", "sphere": "⚽", "hollow_sphere": "⭕", "circle": "⭕", "horizontal_circle": "⭕", "line": "📏",
+    "statue_pillar": "🗿", "statue_steve": "🧑", "statue_owl": "🦉", "statue_dragon": "🐉",
+    "car_simple": "🚗", "car_buggy": "🚙", "rocket": "🚀",
+    "mob_creeper": "💚", "mob_pig": "🐷", "mob_sheep": "🐑", "mob_slime": "🟢", "mob_enderman": "🖤", "mob_zombie": "🧟",
+    "terrarium": "🪟",
 }
 
 with tab_world:
@@ -87,16 +145,50 @@ with tab_world:
         st.caption("Full list: [Pi My Life Up API reference](https://pimylifeup.com/minecraft-pi-edition-api-reference/)")
         cols = st.columns(4)
         for i, (name, bid) in enumerate(BLOCK_REF.items()):
-            cols[i % 4].code(f"{name}: {bid}")
+            icon = BLOCK_ICONS.get(name, "⬜")
+            cols[i % 4].markdown(f"{icon} **{name}**: `{bid}`")
+        st.divider()
+        st.markdown("**Get a block (place near you)**")
+        st.caption("The MCPI API cannot add blocks to your inventory. You can place the selected block in the world next to you so you can see or use it (e.g. plants, flowers, sugar cane).")
+        if mc:
+            inv_block_label = st.selectbox(
+                "Block to place near you",
+                options=_block_display_options(),
+                key="inv_block_select",
+                help="Choose a block (e.g. Sugar cane, Yellow flower, Sapling)",
+            )
+            inv_block_key = _block_label_to_key(inv_block_label)
+            _show_image_if_exists(_block_image_path(inv_block_key), width=64, caption=inv_block_key)
+            inv_block_data = st.number_input("Block data (subtype)", min_value=0, value=0, key="inv_block_data", help="Use for wool colors (0–15), sapling type, etc.")
+            place_at = st.radio("Where to place", ["1 block in front of me", "At my feet", "1 block above my feet"], horizontal=True, key="inv_place_at")
+            if st.button("Place block near me", key="inv_place_btn"):
+                try:
+                    p = mc.player.getTilePos()
+                    if place_at == "1 block in front of me":
+                        # Place in +X direction (common default)
+                        gx, gy, gz = p.x + 1, p.y, p.z
+                    elif place_at == "At my feet":
+                        gx, gy, gz = p.x, p.y, p.z
+                    else:
+                        gx, gy, gz = p.x, p.y + 1, p.z
+                    bid = BLOCK_REF[inv_block_key]
+                    mc.setBlock(gx, gy, gz, bid, int(inv_block_data))
+                    st.success(f"Placed **{inv_block_key}** at ({gx}, {gy}, {gz}).")
+                except Exception as e:
+                    st.error(str(e))
+        else:
+            st.caption("Connect to Minecraft to place blocks near you.")
         st.divider()
         st.markdown("**Seed blocks around the map** — scatter a selected block at random positions in an area.")
         if mc:
             seed_block_label = st.selectbox(
                 "Block to seed",
-                options=list(BLOCK_REF.keys()),
+                options=_block_display_options(),
                 key="seed_block_select",
             )
-            seed_block_id = BLOCK_REF[seed_block_label]
+            seed_block_key = _block_label_to_key(seed_block_label)
+            _show_image_if_exists(_block_image_path(seed_block_key), width=64, caption=seed_block_key)
+            seed_block_id = BLOCK_REF[seed_block_key]
             use_player_center = st.checkbox("Center area on player position", value=True, key="seed_use_player")
             if use_player_center:
                 try:
@@ -132,7 +224,7 @@ with tab_world:
                         placed += 1
                     except Exception:
                         pass
-                st.success(f"Placed **{placed}** blocks of **{seed_block_label}** in the area.")
+                st.success(f"Placed **{placed}** blocks of **{seed_block_key}** in the area.")
         else:
             st.caption("Connect to Minecraft to seed blocks.")
     if mc:
@@ -210,14 +302,19 @@ with tab_builds:
     st.caption("Place structures at a given position. Uses [mcpi](https://pypi.org/project/mcpi/) and [minecraftstuff](https://pypi.org/project/minecraftstuff/) for shapes.")
 
     if mc:
-        build_options = {f"{b['name']} — {b['description']}": b["id"] for b in BUILDS}
+        build_options = {
+            f"{BUILD_ICONS.get(b['id'], '⬜')} {b['name']} — {b['description']}": b["id"]
+            for b in BUILDS
+        }
         selected_label = st.selectbox("Choose a build", list(build_options.keys()))
         build_id = build_options[selected_label]
         build = get_build(build_id)
         if not build:
             st.error("Unknown build")
         else:
-            st.markdown(f"**{build['name']}**: {build['description']}")
+            icon = BUILD_ICONS.get(build_id, "⬜")
+            st.markdown(f"{icon} **{build['name']}**: {build['description']}")
+            _show_image_if_exists(_build_image_path(build_id), width=120, caption=build["name"])
             if build.get("uses_stuff"):
                 st.caption("Requires minecraftstuff library for shapes.")
 
@@ -259,7 +356,7 @@ with tab_builds:
         st.info("Connect to Minecraft first.")
 
 with tab_terrarium:
-    st.subheader("Big terrarium (50×50×20)")
+    st.subheader("🪟 Big terrarium (50×50×20)")
     st.caption("Build a glass enclosure, then spawn mob statues inside. MCPI has no real entity spawn — we place decorative mob builds.")
     if mc:
         st.markdown("**1. Build terrarium**")

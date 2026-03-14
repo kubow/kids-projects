@@ -9,7 +9,7 @@ API reference: https://pimylifeup.com/minecraft-pi-edition-api-reference/
 
 import streamlit as st
 
-from builds import BUILDS, get_build
+from builds import BUILDS, get_build, build_terrarium, populate_terrarium_mobs
 
 # Page config
 st.set_page_config(
@@ -69,8 +69,8 @@ with st.sidebar:
     st.caption("Libraries: mcpi + [minecraftstuff](https://pypi.org/project/minecraftstuff/) for shapes")
 
 # --- Main area: tabs ---
-tab_world, tab_player, tab_builds, tab_chat, tab_camera, tab_blocks = st.tabs([
-    "World (blocks)", "Player", "Predefined builds", "Chat", "Camera", "Block events",
+tab_world, tab_player, tab_builds, tab_terrarium, tab_chat, tab_camera, tab_blocks = st.tabs([
+    "World (blocks)", "Player", "Predefined builds", "Terrarium", "Chat", "Camera", "Block events",
 ])
 
 # Common block IDs (Minecraft Pi / API reference)
@@ -255,6 +255,52 @@ with tab_builds:
                     st.success(f"Placed **{build['name']}** at ({bx}, {by}, {bz})")
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.info("Connect to Minecraft first.")
+
+with tab_terrarium:
+    st.subheader("Big terrarium (50×50×20)")
+    st.caption("Build a glass enclosure, then spawn mob statues inside. MCPI has no real entity spawn — we place decorative mob builds.")
+    if mc:
+        st.markdown("**1. Build terrarium**")
+        if st.button("Sync position with player", key="terr_sync"):
+            try:
+                p = mc.player.getTilePos()
+                st.session_state["terr_x"] = p.x
+                st.session_state["terr_y"] = p.y
+                st.session_state["terr_z"] = p.z
+                st.rerun()
+            except Exception as e:
+                st.error(str(e))
+        tx = st.number_input("Origin X", value=st.session_state.get("terr_x", 0), key="terr_x")
+        ty = st.number_input("Origin Y", value=st.session_state.get("terr_y", 0), key="terr_y")
+        tz = st.number_input("Origin Z", value=st.session_state.get("terr_z", 0), key="terr_z")
+        tw = st.number_input("Width", value=50, min_value=10, key="terr_w")
+        td = st.number_input("Depth", value=50, min_value=10, key="terr_d")
+        th = st.number_input("Height", value=20, min_value=5, key="terr_h")
+        if st.button("Build terrarium", type="primary", key="terr_build"):
+            try:
+                build_terrarium(mc, int(tx), int(ty), int(tz), width=int(tw), depth=int(td), height=int(th))
+                st.success(f"Built terrarium at ({tx}, {ty}, {tz}) — {tw}×{td}×{th} blocks.")
+            except Exception as e:
+                st.error(str(e))
+
+        st.divider()
+        st.markdown("**2. Spawn mobs inside** (after terrarium is built)")
+        st.caption("Places random mob statues (creeper, pig, sheep, slime, zombie, enderman) inside the terrarium.")
+        pm_x = st.number_input("Terrarium origin X", value=tx, key="terr_pm_x")
+        pm_y = st.number_input("Terrarium origin Y", value=ty, key="terr_pm_y")
+        pm_z = st.number_input("Terrarium origin Z", value=tz, key="terr_pm_z")
+        pm_w = st.number_input("Terrarium width", value=50, min_value=10, key="terr_pm_w")
+        pm_d = st.number_input("Terrarium depth", value=50, min_value=10, key="terr_pm_d")
+        pm_h = st.number_input("Terrarium height", value=20, min_value=5, key="terr_pm_h")
+        mob_count = st.slider("Number of mobs to place", min_value=1, max_value=50, value=15, key="terr_mob_count")
+        if st.button("Spawn mobs inside terrarium", type="primary", key="terr_spawn"):
+            try:
+                n = populate_terrarium_mobs(mc, int(pm_x), int(pm_y), int(pm_z), width=int(pm_w), depth=int(pm_d), height=int(pm_h), count=mob_count)
+                st.success(f"Placed **{n}** mobs inside the terrarium.")
+            except Exception as e:
+                st.error(str(e))
     else:
         st.info("Connect to Minecraft first.")
 

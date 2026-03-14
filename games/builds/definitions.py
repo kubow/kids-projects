@@ -358,6 +358,64 @@ def build_mob_zombie(mc, x, y, z):
     mc.setBlock(x + 1, y + 4, z, block_constants.GLOWSTONE_BLOCK.id)
 
 
+# --- Terrarium (big enclosure + spawn mobs inside) ---
+
+def build_terrarium(mc, x, y, z, width=50, depth=50, height=20):
+    """Big glass terrarium: floor, ceiling, four walls, hollow inside (50×50×20 default)."""
+    # Floor (stone so it's solid)
+    mc.setBlocks(x, y, z, x + width, y, z + depth, block_constants.STONE.id)
+    # Ceiling (glass)
+    mc.setBlocks(x, y + height, z, x + width, y + height, z + depth, block_constants.GLASS.id)
+    # Four walls (glass): front and back (along x), left and right (along z)
+    # Wall at z (front)
+    mc.setBlocks(x, y + 1, z, x + width, y + height - 1, z, block_constants.GLASS.id)
+    # Wall at z + depth (back)
+    mc.setBlocks(x, y + 1, z + depth, x + width, y + height - 1, z + depth, block_constants.GLASS.id)
+    # Wall at x (left)
+    mc.setBlocks(x, y + 1, z, x, y + height - 1, z + depth, block_constants.GLASS.id)
+    # Wall at x + width (right)
+    mc.setBlocks(x + width, y + 1, z, x + width, y + height - 1, z + depth, block_constants.GLASS.id)
+    # Hollow interior (air) — floor at y+1, up to y+height-1
+    mc.setBlocks(x + 1, y + 1, z + 1, x + width - 1, y + height - 1, z + depth - 1, block_constants.AIR.id)
+
+
+# Mob build functions that can be placed inside terrarium (id, fn)
+_TERRARIUM_MOB_BUILDERS = [
+    ("creeper", build_mob_creeper),
+    ("pig", build_mob_pig),
+    ("sheep", build_mob_sheep),
+    ("slime", build_mob_slime),
+    ("zombie", build_mob_zombie),
+    ("enderman", build_mob_enderman),
+]
+
+
+def populate_terrarium_mobs(mc, x, y, z, width=50, depth=50, height=20, count=15):
+    """Place random mob builds (statues) inside the terrarium. MCPI has no spawn-entity API."""
+    import random
+    # Interior bounds: leave margin so mobs (2–4 blocks) fit
+    x_min = x + 4
+    x_max = x + width - 4
+    z_min = z + 4
+    z_max = z + depth - 4
+    y_floor = y + 1
+    if x_max <= x_min or z_max <= z_min:
+        mc.postToChat("Terrarium too small to place mobs")
+        return 0
+    builders = list(_TERRARIUM_MOB_BUILDERS)
+    placed = 0
+    for _ in range(int(count)):
+        px = random.randint(x_min, x_max)
+        pz = random.randint(z_min, z_max)
+        name, build_fn = random.choice(builders)
+        try:
+            build_fn(mc, px, y_floor, pz)
+            placed += 1
+        except Exception:
+            pass
+    return placed
+
+
 # --- Registry for the Streamlit UI ---
 
 BUILDS = [
@@ -586,6 +644,18 @@ BUILDS = [
         "fn": build_mob_zombie,
         "uses_stuff": False,
         "params": [],
+    },
+    {
+        "id": "terrarium",
+        "name": "Terrarium",
+        "description": "Big glass enclosure 50×50×20 (floor, walls, ceiling, hollow). Spawn mobs after with the Terrarium tab.",
+        "fn": build_terrarium,
+        "uses_stuff": False,
+        "params": [
+            ("width", "int", 50, "Width (blocks)"),
+            ("depth", "int", 50, "Depth (blocks)"),
+            ("height", "int", 20, "Height (blocks)"),
+        ],
     },
 ]
 

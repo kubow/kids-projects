@@ -3,15 +3,11 @@
 Streamlit UI for Minecraft Pi Edition API.
 """
 
-from pathlib import Path
 import random
 
 import streamlit as st
 
 from builds import BUILDS, get_build, populate_terrarium_mobs
-
-
-ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
 
 BLOCK_REF = {
@@ -182,25 +178,6 @@ BUILD_ICONS = {
     "mob_zombie": "🧟",
     "terrarium": "🪟",
 }
-
-
-def _block_image_path(block_key: str) -> Path:
-    name = block_key.replace(" ", "_") + ".png"
-    return ASSETS_DIR / "blocks" / name
-
-
-def _build_image_path(build_id: str) -> Path:
-    return ASSETS_DIR / "builds" / f"{build_id}.png"
-
-
-def _show_image_if_exists(path: Path, width: int = 80, caption: str = ""):
-    if path.exists():
-        try:
-            st.image(str(path), width=width, caption=caption or None)
-        except Exception:
-            pass
-
-
 def connect_minecraft(host: str, port: int):
     try:
         from mcpi.minecraft import Minecraft
@@ -324,7 +301,6 @@ with tab_blocks:
 
         _sync_selected_block_defaults()
         place_block_key = _block_label_to_key(place_block_label)
-        _show_image_if_exists(_block_image_path(place_block_key), width=64, caption=place_block_key)
 
         block_cols = st.columns(2)
         with block_cols[0]:
@@ -397,8 +373,6 @@ with tab_builds:
                 if st.button("Sync position", key="build_sync_btn", use_container_width=True):
                     _sync_position_from_player(mc, "build")
                     st.rerun()
-
-            _show_image_if_exists(_build_image_path(build_id), width=120, caption=build["name"])
 
             build_x, build_y, build_z = _position_inputs("build", default_pos)
 

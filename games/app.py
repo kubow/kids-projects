@@ -98,21 +98,37 @@ tab_world, tab_player, tab_builds, tab_terrarium, tab_chat, tab_camera, tab_bloc
 # Block IDs (Minecraft Pi / API reference). Includes plants and special blocks.
 BLOCK_REF = {
     "Air": 0, "Stone": 1, "Grass": 2, "Dirt": 3, "Cobblestone": 4,
-    "Wood planks": 5, "Sapling": 6, "Wood": 17, "Leaves": 18, "Glass": 20,
+    "Wood planks": 5, "Sapling": 6, "Bedrock": 7, "Water": 8, "Still water": 9,
+    "Lava": 10, "Still lava": 11, "Sand": 12, "Gravel": 13, "Gold ore": 14,
+    "Iron ore": 15, "Coal ore": 16, "Wood": 17, "Leaves": 18, "Glass": 20,
+    "Lapis lazuli block": 22, "Sandstone": 24, "Bed": 26, "Cobweb": 30, "Tall grass": 31,
     "Wool": 35, "Yellow flower": 37, "Cyan flower": 38, "Brown mushroom": 39, "Red mushroom": 40,
-    "Gold block": 41, "Iron block": 42, "Brick": 45, "TNT": 46, "Bookshelf": 47, "Torch": 50,
-    "Sandstone": 24, "Diamond block": 57, "Sugar cane": 83, "Cactus": 81, "Clay": 82,
-    "Tall grass": 31, "Melon": 103, "Glowstone": 89, "Snow": 78, "Ice": 79,
+    "Gold block": 41, "Iron block": 42, "Double slab": 43, "Slab": 44, "Brick": 45,
+    "TNT": 46, "Bookshelf": 47, "Moss stone": 48, "Obsidian": 49, "Torch": 50,
+    "Fire": 51, "Stairs (wood)": 53, "Chest": 54, "Diamond ore": 56, "Diamond block": 57,
+    "Crafting table": 58, "Farmland": 60, "Furnace": 61, "Lit furnace": 62, "Door": 64,
+    "Ladder": 65, "Stairs (cobblestone)": 67, "Snow": 78, "Ice": 79, "Snow block": 80,
+    "Cactus": 81, "Clay": 82, "Sugar cane": 83, "Fence": 85, "Glowstone": 89,
+    "Invisible bedrock": 95, "Stone brick": 98, "Glass pane": 102, "Melon": 103,
+    "Fence gate": 107, "Glowing obsidian": 246, "Nether reactor core": 247,
 }
 
 # Emoji icons for block list (visual representation)
 BLOCK_ICONS = {
     "Air": "⬜", "Stone": "🪨", "Grass": "🌿", "Dirt": "🟫", "Cobblestone": "🪨",
-    "Wood planks": "🪵", "Sapling": "🌱", "Wood": "🪵", "Leaves": "🍃", "Glass": "🪟",
+    "Wood planks": "🪵", "Sapling": "🌱", "Bedrock": "⬛", "Water": "💧", "Still water": "💧",
+    "Lava": "🔥", "Still lava": "🔥", "Sand": "🟨", "Gravel": "🪨", "Gold ore": "🟨",
+    "Iron ore": "⛏️", "Coal ore": "⚫", "Wood": "🪵", "Leaves": "🍃", "Glass": "🪟",
+    "Lapis lazuli block": "🔷", "Sandstone": "🟨", "Bed": "🛏️", "Cobweb": "🕸️", "Tall grass": "🌾",
     "Wool": "🧶", "Yellow flower": "🌸", "Cyan flower": "💠", "Brown mushroom": "🍄", "Red mushroom": "🍄",
-    "Gold block": "🟨", "Iron block": "⬜", "Brick": "🧱", "TNT": "🧨", "Bookshelf": "📚", "Torch": "🔦",
-    "Sandstone": "🟨", "Diamond block": "💎", "Sugar cane": "🫚", "Cactus": "🌵", "Clay": "🟤",
-    "Tall grass": "🌾", "Melon": "🍈", "Glowstone": "✨", "Snow": "❄️", "Ice": "🧊",
+    "Gold block": "🟨", "Iron block": "⬜", "Double slab": "🧱", "Slab": "🧱", "Brick": "🧱",
+    "TNT": "🧨", "Bookshelf": "📚", "Moss stone": "🪨", "Obsidian": "🟪", "Torch": "🔦",
+    "Fire": "🔥", "Stairs (wood)": "🪵", "Chest": "📦", "Diamond ore": "💎", "Diamond block": "💎",
+    "Crafting table": "🛠️", "Farmland": "🌱", "Furnace": "🔥", "Lit furnace": "🔥", "Door": "🚪",
+    "Ladder": "🪜", "Stairs (cobblestone)": "🪨", "Snow": "❄️", "Ice": "🧊", "Snow block": "☃️",
+    "Cactus": "🌵", "Clay": "🟤", "Sugar cane": "🫚", "Fence": "🪵", "Glowstone": "✨",
+    "Stone brick": "🧱", "Glass pane": "🪟", "Melon": "🍈", "Fence gate": "🚧",
+    "Glowing obsidian": "✨", "Nether reactor core": "⚛️",
 }
 
 def _block_display_options():
@@ -129,6 +145,20 @@ def _block_label_to_key(label):
             return k
     return list(BLOCK_REF.keys())[0]
 
+
+def _sync_selected_block_defaults(select_key: str, block_id_key: str, block_data_key: str):
+    """Keep block ID/data inputs aligned with the selected preset until the user changes them."""
+    selected_label = st.session_state.get(select_key)
+    if not selected_label:
+        return
+    selected_key = _block_label_to_key(selected_label)
+    selected_id = BLOCK_REF[selected_key]
+    previous_key = f"{select_key}_previous"
+    if st.session_state.get(previous_key) != selected_key:
+        st.session_state[block_id_key] = selected_id
+        st.session_state[block_data_key] = 0
+        st.session_state[previous_key] = selected_key
+
 # Build icons for predefined builds (visual representation)
 BUILD_ICONS = {
     "simple_house": "🏠", "tower": "🗼", "wall": "🧱", "pyramid": "🔺", "platform": "📦",
@@ -141,92 +171,88 @@ BUILD_ICONS = {
 
 with tab_world:
     st.subheader("World / blocks")
-    with st.expander("Block ID reference (common) & seed blocks"):
+    with st.expander("Block ID reference (common) & placement"):
         st.caption("Full list: [Pi My Life Up API reference](https://pimylifeup.com/minecraft-pi-edition-api-reference/)")
         cols = st.columns(4)
         for i, (name, bid) in enumerate(BLOCK_REF.items()):
             icon = BLOCK_ICONS.get(name, "⬜")
             cols[i % 4].markdown(f"{icon} **{name}**: `{bid}`")
         st.divider()
-        st.markdown("**Get a block (place near you)**")
-        st.caption("The MCPI API cannot add blocks to your inventory. You can place the selected block in the world next to you so you can see or use it (e.g. plants, flowers, sugar cane).")
+        st.markdown("**Place blocks**")
+        st.caption("One simple placement panel: choose a block preset or type a custom ID, optionally spread it in an area, and sync the position from the player.")
         if mc:
-            inv_block_label = st.selectbox(
-                "Block to place near you",
+            place_block_label = st.selectbox(
+                "Brick type",
                 options=_block_display_options(),
-                key="inv_block_select",
-                help="Choose a block (e.g. Sugar cane, Yellow flower, Sapling)",
+                key="place_block_select",
+                help="Pick a preset first, then tweak the numeric ID or data if you want to experiment.",
             )
-            inv_block_key = _block_label_to_key(inv_block_label)
-            _show_image_if_exists(_block_image_path(inv_block_key), width=64, caption=inv_block_key)
-            inv_block_data = st.number_input("Block data (subtype)", min_value=0, value=0, key="inv_block_data", help="Use for wool colors (0–15), sapling type, etc.")
-            place_at = st.radio("Where to place", ["1 block in front of me", "At my feet", "1 block above my feet"], horizontal=True, key="inv_place_at")
-            if st.button("Place block near me", key="inv_place_btn"):
+            _sync_selected_block_defaults("place_block_select", "place_block_id", "place_block_data")
+            place_block_key = _block_label_to_key(place_block_label)
+            _show_image_if_exists(_block_image_path(place_block_key), width=64, caption=place_block_key)
+
+            block_cols = st.columns(2)
+            with block_cols[0]:
+                place_block_id = st.number_input("Block ID", min_value=0, value=int(st.session_state.get("place_block_id", BLOCK_REF[place_block_key])), key="place_block_id")
+            with block_cols[1]:
+                place_block_data = st.number_input("Block data", min_value=0, value=int(st.session_state.get("place_block_data", 0)), key="place_block_data", help="Useful for wool colors, sapling type, and other variants.")
+
+            if st.button("Sync with current position", key="place_sync_btn"):
                 try:
                     p = mc.player.getTilePos()
-                    if place_at == "1 block in front of me":
-                        # Place in +X direction (common default)
-                        gx, gy, gz = p.x + 1, p.y, p.z
-                    elif place_at == "At my feet":
-                        gx, gy, gz = p.x, p.y, p.z
+                    st.session_state["place_x"] = p.x
+                    st.session_state["place_y"] = p.y
+                    st.session_state["place_z"] = p.z
+                    st.rerun()
+                except Exception as e:
+                    st.error(str(e))
+
+            try:
+                player_pos = mc.player.getTilePos()
+                default_x, default_y, default_z = player_pos.x, player_pos.y, player_pos.z
+            except Exception:
+                default_x, default_y, default_z = 0, 0, 0
+
+            pos_cols = st.columns(3)
+            with pos_cols[0]:
+                place_x = st.number_input("Position X", value=int(st.session_state.get("place_x", default_x)), key="place_x")
+            with pos_cols[1]:
+                place_y = st.number_input("Position Y", value=int(st.session_state.get("place_y", default_y)), key="place_y")
+            with pos_cols[2]:
+                place_z = st.number_input("Position Z", value=int(st.session_state.get("place_z", default_z)), key="place_z")
+
+            spread_mode = st.checkbox("Spread mode", value=False, key="place_spread_mode")
+            if spread_mode:
+                spread_cols = st.columns(2)
+                with spread_cols[0]:
+                    spread_radius = st.number_input("Radius", min_value=1, max_value=200, value=10, key="place_spread_radius")
+                with spread_cols[1]:
+                    spread_count = st.number_input("Brick count", min_value=1, max_value=1000, value=25, key="place_spread_count")
+            else:
+                spread_radius = 0
+                spread_count = 1
+
+            if st.button("Place brick", type="primary", key="place_block_btn"):
+                try:
+                    import random
+
+                    placed = 0
+                    for _ in range(int(spread_count)):
+                        if spread_mode:
+                            rx = int(place_x) + random.randint(-int(spread_radius), int(spread_radius))
+                            rz = int(place_z) + random.randint(-int(spread_radius), int(spread_radius))
+                        else:
+                            rx, rz = int(place_x), int(place_z)
+                        mc.setBlock(rx, int(place_y), rz, int(place_block_id), int(place_block_data))
+                        placed += 1
+                    if spread_mode:
+                        st.success(f"Placed **{placed}** bricks around ({place_x}, {place_y}, {place_z}) with radius {spread_radius}.")
                     else:
-                        gx, gy, gz = p.x, p.y + 1, p.z
-                    bid = BLOCK_REF[inv_block_key]
-                    mc.setBlock(gx, gy, gz, bid, int(inv_block_data))
-                    st.success(f"Placed **{inv_block_key}** at ({gx}, {gy}, {gz}).")
+                        st.success(f"Placed block ID **{place_block_id}** at ({place_x}, {place_y}, {place_z}).")
                 except Exception as e:
                     st.error(str(e))
         else:
-            st.caption("Connect to Minecraft to place blocks near you.")
-        st.divider()
-        st.markdown("**Seed blocks around the map** — scatter a selected block at random positions in an area.")
-        if mc:
-            seed_block_label = st.selectbox(
-                "Block to seed",
-                options=_block_display_options(),
-                key="seed_block_select",
-            )
-            seed_block_key = _block_label_to_key(seed_block_label)
-            _show_image_if_exists(_block_image_path(seed_block_key), width=64, caption=seed_block_key)
-            seed_block_id = BLOCK_REF[seed_block_key]
-            use_player_center = st.checkbox("Center area on player position", value=True, key="seed_use_player")
-            if use_player_center:
-                try:
-                    p = mc.player.getTilePos()
-                    seed_cx, seed_cz = p.x, p.z
-                except Exception:
-                    seed_cx, seed_cz = 0, 0
-            else:
-                seed_cx = st.number_input("Center X", value=0, key="seed_cx")
-                seed_cz = st.number_input("Center Z", value=0, key="seed_cz")
-            seed_radius = st.slider("Radius (blocks) from center", min_value=5, max_value=80, value=20, key="seed_radius")
-            seed_count = st.number_input("Number of blocks to place", min_value=1, max_value=500, value=30, key="seed_count")
-            seed_at_surface = st.checkbox("Place on surface (use getHeight)", value=True, key="seed_at_surface")
-            if not seed_at_surface:
-                seed_fixed_y = st.number_input("Fixed Y level", value=0, key="seed_fixed_y")
-            else:
-                seed_fixed_y = 0
-            if st.button("Seed blocks", type="primary", key="seed_btn"):
-                import random
-                placed = 0
-                for _ in range(int(seed_count)):
-                    rx = seed_cx + random.randint(-seed_radius, seed_radius)
-                    rz = seed_cz + random.randint(-seed_radius, seed_radius)
-                    if seed_at_surface:
-                        try:
-                            ry = mc.getHeight(rx, rz)
-                        except Exception:
-                            ry = 0
-                    else:
-                        ry = int(seed_fixed_y)
-                    try:
-                        mc.setBlock(rx, ry, rz, seed_block_id, 0)
-                        placed += 1
-                    except Exception:
-                        pass
-                st.success(f"Placed **{placed}** blocks of **{seed_block_key}** in the area.")
-        else:
-            st.caption("Connect to Minecraft to seed blocks.")
+            st.caption("Connect to Minecraft to place blocks.")
     if mc:
         c1, c2 = st.columns(2)
         with c1:

@@ -3,7 +3,12 @@
 Streamlit UI for Minecraft Pi Edition API.
 """
 
+import io
+import logging
 import random
+import sys
+import threading
+import traceback
 
 import streamlit as st
 
@@ -178,6 +183,128 @@ BUILD_ICONS = {
     "mob_zombie": "🧟",
     "terrarium": "🪟",
 }
+
+
+MAX_BROWSER_ERRORS = 20
+_LOG_CAPTURE_INSTALLED = False
+
+
+def _ensure_error_state():
+    if "browser_errors" not in st.session_state:
+        st.session_state.browser_errors = []
+
+
+def _store_browser_error(message: str):
+    _ensure_error_state()
+    cleaned = (message or "").strip()
+    if not cleaned:
+        return
+
+    errors = st.session_state.browser_errors
+    if errors and errors[-1] == cleaned:
+        return
+
+    errors.append(cleaned)
+    if len(errors) > MAX_BROWSER_ERRORS:
+        del errors[:-MAX_BROWSER_ERRORS]
+
+
+def _format_exception(title: str, exc: BaseException) -> str:
+    details = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)).strip()
+    return f"{title}\n{details}"
+
+
+class BrowserErrorHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            if record.levelno < logging.ERROR:
+                return
+            _store_browser_error(self.format(record))
+        except Exception:
+            pass
+
+
+class TeeStderr(io.TextIOBase):
+    def __init__(self, original):
+        self.original = original
+        self._buffer = ""
+
+    def write(self, text):
+        if self.original:
+            self.original.write(text)
+        if not text:
+            return 0
+
+        self._buffer += text
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            if line.strip():
+                _store_browser_error(line)
+        return len(text)
+
+    def flush(self):
+        if self.original:
+            self.original.flush()
+        if self._buffer.strip():
+            _store_browser_error(self._buffer)
+            self._buffer = ""
+
+
+def _install_browser_error_capture():
+    global _LOG_CAPTURE_INSTALLED
+    _ensure_error_state()
+
+    if not st.session_state.get("_browser_stderr_installed"):
+        sys.stderr = TeeStderr(sys.stderr)
+        st.session_state._browser_stderr_installed = True
+
+    if not _LOG_CAPTURE_INSTALLED:
+        handler = BrowserErrorHandler()
+        handler.setLevel(logging.ERROR)
+        handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+        logging.getLogger().addHandler(handler)
+        _LOG_CAPTURE_INSTALLED = True
+
+    def _browser_excepthook(exc_type, exc, tb):
+        _store_browser_error("Uncaught exception\n" + "".join(traceback.format_exception(exc_type, exc, tb)).strip())
+        if sys.__excepthook__:
+            sys.__excepthook__(exc_type, exc, tb)
+
+    def _thread_excepthook(args):
+        _store_browser_error(
+            "Thread exception\n"
+            + "".join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback)).strip()
+        )
+        if hasattr(threading, "__excepthook__"):
+            threading.__excepthook__(args)
+
+    sys.excepthook = _browser_excepthook
+    if hasattr(threading, "excepthook"):
+        threading.excepthook = _thread_excepthook
+
+
+def _render_browser_errors():
+    _ensure_error_state()
+    errors = st.session_state.browser_errors
+    if not errors:
+        return
+
+    header_cols = st.columns([6, 1])
+    with header_cols[0]:
+        st.warning(f"Console errors captured: {len(errors)}")
+    with header_cols[1]:
+        if st.button("Clear", key="clear_browser_errors", use_container_width=True):
+            st.session_state.browser_errors = []
+            st.rerun()
+
+    with st.expander("Show console errors", expanded=False):
+        st.caption("Recent stderr, logging, and uncaught Python exceptions are mirrored here.")
+        for index, error in enumerate(reversed(errors), start=1):
+            st.code(error, language="text")
+            if index < len(errors):
+                st.divider()
+
+
 def connect_minecraft(host: str, port: int):
     try:
         from mcpi.minecraft import Minecraft
@@ -188,6 +315,7 @@ def connect_minecraft(host: str, port: int):
     except Exception as exc:
         st.session_state.mc = None
         st.session_state.mc_error = str(exc)
+        _store_browser_error(_format_exception("Minecraft connection failed", exc))
         return False
 
 
@@ -246,6 +374,215 @@ def _sync_selected_block_defaults():
         st.session_state["place_block_select_previous"] = selected_key
 
 
+def render_app():
+    _render_browser_errors()
+
+    with st.sidebar:
+        st.header("⛏️ Minecraft Pi API")
+        st.caption("Connect to Minecraft Pi Edition or RaspberryJuice.")
+
+        host = st.text_input("Host", value="localhost", key="host")
+        port = st.number_input("Port", min_value=1, max_value=65535, value=4711, key="port")
+
+        if st.button("Connect", type="primary", use_container_width=True):
+            with st.spinner("Connecting…"):
+                connect_minecraft(host, int(port))
+
+        mc = get_mc()
+        if mc:
+            st.success("Connected")
+        else:
+            st.warning(st.session_state.mc_error or "Not connected")
+
+    tab_blocks, tab_builds, tab_player = st.tabs(["Blocks", "Builds", "Player"])
+
+    with tab_blocks:
+        st.subheader("Blocks")
+        if mc:
+            default_pos = _get_player_tile_pos(mc)
+            action_col, sync_col = st.columns([3, 1])
+            with action_col:
+                place_block_label = st.selectbox(
+                    "Brick type",
+                    options=_block_display_options(),
+                    key="place_block_select",
+                    help="Choose a preset, or override the numeric ID below.",
+                )
+            with sync_col:
+                st.write("")
+                st.write("")
+                if st.button("Sync position", key="place_sync_btn", use_container_width=True):
+                    _sync_position_from_player(mc, "place")
+                    st.rerun()
+
+            _sync_selected_block_defaults()
+            place_block_key = _block_label_to_key(place_block_label)
+
+            block_cols = st.columns(2)
+            with block_cols[0]:
+                place_block_id = st.number_input(
+                    "Block ID",
+                    min_value=0,
+                    value=int(st.session_state.get("place_block_id", BLOCK_REF[place_block_key])),
+                    key="place_block_id",
+                )
+            with block_cols[1]:
+                place_block_data = st.number_input(
+                    "Block data",
+                    min_value=0,
+                    value=int(st.session_state.get("place_block_data", 0)),
+                    key="place_block_data",
+                )
+
+            place_x, place_y, place_z = _position_inputs("place", default_pos)
+
+            spread_mode = st.checkbox("Spread mode", value=False, key="place_spread_mode")
+            spread_radius = 0
+            spread_count = 1
+            if spread_mode:
+                spread_cols = st.columns(2)
+                with spread_cols[0]:
+                    spread_radius = st.number_input(
+                        "Radius",
+                        min_value=1,
+                        max_value=200,
+                        value=10,
+                        key="place_spread_radius",
+                    )
+                with spread_cols[1]:
+                    spread_count = st.number_input(
+                        "Brick count",
+                        min_value=1,
+                        max_value=1000,
+                        value=25,
+                        key="place_spread_count",
+                    )
+
+            if st.button("Place brick", type="primary", key="place_block_btn"):
+                try:
+                    placed = 0
+                    for _ in range(spread_count):
+                        x = place_x
+                        z = place_z
+                        if spread_mode:
+                            x += random.randint(-spread_radius, spread_radius)
+                            z += random.randint(-spread_radius, spread_radius)
+                        mc.setBlock(x, place_y, z, int(place_block_id), int(place_block_data))
+                        placed += 1
+                    st.success(f"Placed {placed} brick{'s' if placed != 1 else ''}.")
+                except Exception as exc:
+                    _store_browser_error(_format_exception("Block placement failed", exc))
+                    st.error(str(exc))
+        else:
+            st.info("Connect to Minecraft first.")
+
+    with tab_builds:
+        st.subheader("Builds")
+        st.caption("Place a predefined build, then optionally populate a terrarium with mobs.")
+
+        if mc:
+            build_options = {
+                f"{BUILD_ICONS.get(build['id'], '⬜')} {build['name']}": build["id"]
+                for build in BUILDS
+            }
+            selected_label = st.selectbox("Build type", list(build_options.keys()))
+            build_id = build_options[selected_label]
+            build = get_build(build_id)
+
+            if build:
+                default_pos = _get_player_tile_pos(mc)
+                action_col, sync_col = st.columns([3, 1])
+                with action_col:
+                    st.markdown(f"**{build['name']}**")
+                    st.caption(build["description"])
+                with sync_col:
+                    st.write("")
+                    st.write("")
+                    if st.button("Sync position", key="build_sync_btn", use_container_width=True):
+                        _sync_position_from_player(mc, "build")
+                        st.rerun()
+
+                build_x, build_y, build_z = _position_inputs("build", default_pos)
+
+                extra = {}
+                for param_name, param_type, default, label in build.get("params", []):
+                    if param_type == "int":
+                        extra[param_name] = int(
+                            st.number_input(label, value=int(default), key=f"build_{build_id}_{param_name}")
+                        )
+
+                if st.button("Place build", type="primary", key="place_build_btn"):
+                    try:
+                        build["fn"](mc, build_x, build_y, build_z, **extra)
+                        st.success(f"Placed {build['name']}.")
+                    except Exception as exc:
+                        _store_browser_error(_format_exception(f"Build placement failed: {build['name']}", exc))
+                        st.error(str(exc))
+
+            with st.expander("Terrarium mobs"):
+                st.caption("Use this after placing the terrarium build.")
+                terr_default_pos = (
+                    int(st.session_state.get("build_x", _get_player_tile_pos(mc)[0])),
+                    int(st.session_state.get("build_y", _get_player_tile_pos(mc)[1])),
+                    int(st.session_state.get("build_z", _get_player_tile_pos(mc)[2])),
+                )
+                if st.button("Use build position", key="terr_use_build_pos"):
+                    st.session_state["terr_x"] = int(st.session_state.get("build_x", terr_default_pos[0]))
+                    st.session_state["terr_y"] = int(st.session_state.get("build_y", terr_default_pos[1]))
+                    st.session_state["terr_z"] = int(st.session_state.get("build_z", terr_default_pos[2]))
+                    st.rerun()
+
+                tx, ty, tz = _position_inputs("terr", terr_default_pos)
+
+                size_cols = st.columns(3)
+                with size_cols[0]:
+                    tw = st.number_input("Width", value=50, min_value=10, key="terr_w")
+                with size_cols[1]:
+                    td = st.number_input("Depth", value=50, min_value=10, key="terr_d")
+                with size_cols[2]:
+                    th = st.number_input("Height", value=20, min_value=5, key="terr_h")
+
+                mob_count = st.slider("Mob count", min_value=1, max_value=50, value=15, key="terr_mob_count")
+                if st.button("Spawn mobs", type="primary", key="terr_spawn"):
+                    try:
+                        placed = populate_terrarium_mobs(
+                            mc,
+                            tx,
+                            ty,
+                            tz,
+                            width=int(tw),
+                            depth=int(td),
+                            height=int(th),
+                            count=mob_count,
+                        )
+                        st.success(f"Placed {placed} mobs.")
+                    except Exception as exc:
+                        _store_browser_error(_format_exception("Terrarium mob placement failed", exc))
+                        st.error(str(exc))
+        else:
+            st.info("Connect to Minecraft first.")
+
+    with tab_player:
+        st.subheader("Player")
+        if mc:
+            px, py, pz = _get_player_tile_pos(mc)
+            st.info(f"Current tile position: x={px}, y={py}, z={pz}")
+
+            tx, ty, tz = _position_inputs("teleport", (px, py, pz))
+            if st.button("Teleport", type="primary", key="teleport_btn"):
+                try:
+                    mc.player.setTilePos(tx, ty, tz)
+                    st.success("Teleported.")
+                except Exception as exc:
+                    _store_browser_error(_format_exception("Teleport failed", exc))
+                    st.error(str(exc))
+        else:
+            st.info("Connect to Minecraft first.")
+
+    st.divider()
+    st.caption("Minecraft Pi Edition API")
+
+
 st.set_page_config(
     page_title="Minecraft Pi API",
     page_icon="⛏️",
@@ -258,197 +595,10 @@ if "mc" not in st.session_state:
 if "mc_error" not in st.session_state:
     st.session_state.mc_error = None
 
+_install_browser_error_capture()
 
-with st.sidebar:
-    st.header("⛏️ Minecraft Pi API")
-    st.caption("Connect to Minecraft Pi Edition or RaspberryJuice.")
-
-    host = st.text_input("Host", value="localhost", key="host")
-    port = st.number_input("Port", min_value=1, max_value=65535, value=4711, key="port")
-
-    if st.button("Connect", type="primary", use_container_width=True):
-        with st.spinner("Connecting…"):
-            connect_minecraft(host, int(port))
-
-    mc = get_mc()
-    if mc:
-        st.success("Connected")
-    else:
-        st.warning(st.session_state.mc_error or "Not connected")
-
-
-tab_blocks, tab_builds, tab_player = st.tabs(["Blocks", "Builds", "Player"])
-
-
-with tab_blocks:
-    st.subheader("Blocks")
-    if mc:
-        default_pos = _get_player_tile_pos(mc)
-        action_col, sync_col = st.columns([3, 1])
-        with action_col:
-            place_block_label = st.selectbox(
-                "Brick type",
-                options=_block_display_options(),
-                key="place_block_select",
-                help="Choose a preset, or override the numeric ID below.",
-            )
-        with sync_col:
-            st.write("")
-            st.write("")
-            if st.button("Sync position", key="place_sync_btn", use_container_width=True):
-                _sync_position_from_player(mc, "place")
-                st.rerun()
-
-        _sync_selected_block_defaults()
-        place_block_key = _block_label_to_key(place_block_label)
-
-        block_cols = st.columns(2)
-        with block_cols[0]:
-            place_block_id = st.number_input(
-                "Block ID",
-                min_value=0,
-                value=int(st.session_state.get("place_block_id", BLOCK_REF[place_block_key])),
-                key="place_block_id",
-            )
-        with block_cols[1]:
-            place_block_data = st.number_input(
-                "Block data",
-                min_value=0,
-                value=int(st.session_state.get("place_block_data", 0)),
-                key="place_block_data",
-            )
-
-        place_x, place_y, place_z = _position_inputs("place", default_pos)
-
-        spread_mode = st.checkbox("Spread mode", value=False, key="place_spread_mode")
-        spread_radius = 0
-        spread_count = 1
-        if spread_mode:
-            spread_cols = st.columns(2)
-            with spread_cols[0]:
-                spread_radius = st.number_input("Radius", min_value=1, max_value=200, value=10, key="place_spread_radius")
-            with spread_cols[1]:
-                spread_count = st.number_input("Brick count", min_value=1, max_value=1000, value=25, key="place_spread_count")
-
-        if st.button("Place brick", type="primary", key="place_block_btn"):
-            try:
-                placed = 0
-                for _ in range(spread_count):
-                    x = place_x
-                    z = place_z
-                    if spread_mode:
-                        x += random.randint(-spread_radius, spread_radius)
-                        z += random.randint(-spread_radius, spread_radius)
-                    mc.setBlock(x, place_y, z, int(place_block_id), int(place_block_data))
-                    placed += 1
-                st.success(f"Placed {placed} brick{'s' if placed != 1 else ''}.")
-            except Exception as exc:
-                st.error(str(exc))
-    else:
-        st.info("Connect to Minecraft first.")
-
-
-with tab_builds:
-    st.subheader("Builds")
-    st.caption("Place a predefined build, then optionally populate a terrarium with mobs.")
-
-    if mc:
-        build_options = {
-            f"{BUILD_ICONS.get(build['id'], '⬜')} {build['name']}": build["id"]
-            for build in BUILDS
-        }
-        selected_label = st.selectbox("Build type", list(build_options.keys()))
-        build_id = build_options[selected_label]
-        build = get_build(build_id)
-
-        if build:
-            default_pos = _get_player_tile_pos(mc)
-            action_col, sync_col = st.columns([3, 1])
-            with action_col:
-                st.markdown(f"**{build['name']}**")
-                st.caption(build["description"])
-            with sync_col:
-                st.write("")
-                st.write("")
-                if st.button("Sync position", key="build_sync_btn", use_container_width=True):
-                    _sync_position_from_player(mc, "build")
-                    st.rerun()
-
-            build_x, build_y, build_z = _position_inputs("build", default_pos)
-
-            extra = {}
-            for param_name, param_type, default, label in build.get("params", []):
-                if param_type == "int":
-                    extra[param_name] = int(
-                        st.number_input(label, value=int(default), key=f"build_{build_id}_{param_name}")
-                    )
-
-            if st.button("Place build", type="primary", key="place_build_btn"):
-                try:
-                    build["fn"](mc, build_x, build_y, build_z, **extra)
-                    st.success(f"Placed {build['name']}.")
-                except Exception as exc:
-                    st.error(str(exc))
-
-        with st.expander("Terrarium mobs"):
-            st.caption("Use this after placing the terrarium build.")
-            terr_default_pos = (
-                int(st.session_state.get("build_x", _get_player_tile_pos(mc)[0])),
-                int(st.session_state.get("build_y", _get_player_tile_pos(mc)[1])),
-                int(st.session_state.get("build_z", _get_player_tile_pos(mc)[2])),
-            )
-            if st.button("Use build position", key="terr_use_build_pos"):
-                st.session_state["terr_x"] = int(st.session_state.get("build_x", terr_default_pos[0]))
-                st.session_state["terr_y"] = int(st.session_state.get("build_y", terr_default_pos[1]))
-                st.session_state["terr_z"] = int(st.session_state.get("build_z", terr_default_pos[2]))
-                st.rerun()
-
-            tx, ty, tz = _position_inputs("terr", terr_default_pos)
-
-            size_cols = st.columns(3)
-            with size_cols[0]:
-                tw = st.number_input("Width", value=50, min_value=10, key="terr_w")
-            with size_cols[1]:
-                td = st.number_input("Depth", value=50, min_value=10, key="terr_d")
-            with size_cols[2]:
-                th = st.number_input("Height", value=20, min_value=5, key="terr_h")
-
-            mob_count = st.slider("Mob count", min_value=1, max_value=50, value=15, key="terr_mob_count")
-            if st.button("Spawn mobs", type="primary", key="terr_spawn"):
-                try:
-                    placed = populate_terrarium_mobs(
-                        mc,
-                        tx,
-                        ty,
-                        tz,
-                        width=int(tw),
-                        depth=int(td),
-                        height=int(th),
-                        count=mob_count,
-                    )
-                    st.success(f"Placed {placed} mobs.")
-                except Exception as exc:
-                    st.error(str(exc))
-    else:
-        st.info("Connect to Minecraft first.")
-
-
-with tab_player:
-    st.subheader("Player")
-    if mc:
-        px, py, pz = _get_player_tile_pos(mc)
-        st.info(f"Current tile position: x={px}, y={py}, z={pz}")
-
-        tx, ty, tz = _position_inputs("teleport", (px, py, pz))
-        if st.button("Teleport", type="primary", key="teleport_btn"):
-            try:
-                mc.player.setTilePos(tx, ty, tz)
-                st.success("Teleported.")
-            except Exception as exc:
-                st.error(str(exc))
-    else:
-        st.info("Connect to Minecraft first.")
-
-
-st.divider()
-st.caption("Minecraft Pi Edition API")
+try:
+    render_app()
+except Exception as exc:
+    _store_browser_error(_format_exception("App render failed", exc))
+    st.error("The app hit an unexpected error. See the console errors panel above for details.")

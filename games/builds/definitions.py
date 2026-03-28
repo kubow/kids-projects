@@ -20,31 +20,38 @@ def _get_mcdraw(mc):
     return MinecraftDrawing(mc)
 
 
+def _require_minecraftstuff(feature_name):
+    if not HAS_MINECRAFT_STUFF:
+        raise RuntimeError(f"{feature_name} requires the optional 'minecraftstuff' package.")
+
+
 # --- Simple builds using only mcpi setBlock/setBlocks ---
 
 def build_simple_house(mc, x, y, z, width=5, depth=4, height=3, roof_height=2):
     """A small house with walls, wooden roof, and glass."""
+    x2 = x + width - 1
+    z2 = z + depth - 1
     # Floor
-    mc.setBlocks(x, y, z, x + width, y, z + depth, block_constants.WOOD_PLANKS.id)
+    mc.setBlocks(x, y, z, x2, y, z2, block_constants.WOOD_PLANKS.id)
     # Walls
-    mc.setBlocks(x, y + 1, z, x + width, y + height, z + depth, block_constants.BRICK_BLOCK.id)
+    mc.setBlocks(x, y + 1, z, x2, y + height, z2, block_constants.BRICK_BLOCK.id)
     # Hollow interior
-    mc.setBlocks(x + 1, y + 1, z + 1, x + width - 1, y + height - 1, z + depth - 1, block_constants.AIR.id)
+    mc.setBlocks(x + 1, y + 1, z + 1, x2 - 1, y + height - 1, z2 - 1, block_constants.AIR.id)
     # Door
     mc.setBlock(x + width // 2, y + 1, z, block_constants.AIR.id)
     mc.setBlock(x + width // 2, y + 2, z, block_constants.AIR.id)
     # Windows
     mc.setBlocks(x, y + 2, z + depth // 2, x, y + 2, z + depth // 2, block_constants.GLASS.id)
-    mc.setBlocks(x + width, y + 2, z + depth // 2, x + width, y + 2, z + depth // 2, block_constants.GLASS.id)
+    mc.setBlocks(x2, y + 2, z + depth // 2, x2, y + 2, z + depth // 2, block_constants.GLASS.id)
     # Roof (stepped pyramid)
     for i in range(roof_height):
-        mc.setBlocks(x + i, y + height + i, z + i, x + width - i, y + height + i, z + depth - i, block_constants.WOOD.id, 0)
+        mc.setBlocks(x + i, y + height + i, z + i, x2 - i, y + height + i, z2 - i, block_constants.WOOD.id, 0)
 
 
 def build_tower(mc, x, y, z, radius=2, height=10, material_id=None):
     """A cylindrical tower (square footprint for simplicity)."""
     bid = material_id or block_constants.STONE.id
-    mc.setBlocks(x - radius, y, z - radius, x + radius, y + height, z + radius, bid)
+    mc.setBlocks(x - radius, y, z - radius, x + radius, y + height - 1, z + radius, bid)
     # Hollow
     mc.setBlocks(x - radius + 1, y + 1, z - radius + 1, x + radius - 1, y + height - 1, z + radius - 1, block_constants.AIR.id)
 
@@ -84,50 +91,40 @@ def build_pillar(mc, x, y, z, height=6, material_id=None):
 
 def build_sphere(mc, x, y, z, radius=5, material_id=None, material_data=0):
     """Filled sphere (requires minecraftstuff)."""
+    _require_minecraftstuff("Sphere")
     mcdraw = _get_mcdraw(mc)
-    if mcdraw is None:
-        mc.postToChat("Install minecraftstuff for spheres: pip install minecraftstuff")
-        return
     bid = material_id or block_constants.GLOWSTONE_BLOCK.id
     mcdraw.drawSphere(x, y, z, radius, bid, material_data)
 
 
 def build_hollow_sphere(mc, x, y, z, radius=5, material_id=None, material_data=0):
     """Hollow sphere (requires minecraftstuff)."""
+    _require_minecraftstuff("Hollow sphere")
     mcdraw = _get_mcdraw(mc)
-    if mcdraw is None:
-        mc.postToChat("Install minecraftstuff for hollow spheres")
-        return
     bid = material_id or block_constants.GLASS.id
     mcdraw.drawHollowSphere(x, y, z, radius, bid, material_data)
 
 
 def build_circle(mc, x, y, z, radius=5, material_id=None, material_data=0):
     """Vertical circle in Y plane (requires minecraftstuff)."""
+    _require_minecraftstuff("Circle")
     mcdraw = _get_mcdraw(mc)
-    if mcdraw is None:
-        mc.postToChat("Install minecraftstuff for circles")
-        return
     bid = material_id or block_constants.WOOL.id
     mcdraw.drawCircle(x, y, z, radius, bid, material_data)
 
 
 def build_horizontal_circle(mc, x, y, z, radius=5, material_id=None, material_data=0):
     """Horizontal circle (requires minecraftstuff)."""
+    _require_minecraftstuff("Horizontal circle")
     mcdraw = _get_mcdraw(mc)
-    if mcdraw is None:
-        mc.postToChat("Install minecraftstuff for circles")
-        return
     bid = material_id or block_constants.WOOL.id
     mcdraw.drawHorizontalCircle(x, y, z, radius, bid, material_data)
 
 
 def build_line(mc, x, y, z, x2=None, y2=None, z2=None, dx=10, dy=0, dz=0, material_id=None, material_data=0):
     """Line from (x,y,z) to (x2,y2,z2) or (x+dx, y+dy, z+dz) if x2 is None (requires minecraftstuff)."""
+    _require_minecraftstuff("Line")
     mcdraw = _get_mcdraw(mc)
-    if mcdraw is None:
-        mc.postToChat("Install minecraftstuff for lines")
-        return
     if x2 is None:
         x2, y2, z2 = x + dx, y + dy, z + dz
     bid = material_id or block_constants.GLOWSTONE_BLOCK.id
@@ -215,21 +212,22 @@ def build_statue_dragon(mc, x, y, z):
 
 def build_car_simple(mc, x, y, z, length=4):
     """Simple blocky car: body, cabin, wheels (black wool)."""
+    x2 = x + length - 1
     # Wheels (black wool 15) at corners
     mc.setBlock(x, y, z, block_constants.WOOL.id, 15)
-    mc.setBlock(x + length, y, z, block_constants.WOOL.id, 15)
+    mc.setBlock(x2, y, z, block_constants.WOOL.id, 15)
     mc.setBlock(x, y, z + 1, block_constants.WOOL.id, 15)
-    mc.setBlock(x + length, y, z + 1, block_constants.WOOL.id, 15)
+    mc.setBlock(x2, y, z + 1, block_constants.WOOL.id, 15)
     # Chassis
-    mc.setBlocks(x, y + 1, z, x + length, y + 1, z + 1, block_constants.IRON_BLOCK.id)
+    mc.setBlocks(x, y + 1, z, x2, y + 1, z + 1, block_constants.IRON_BLOCK.id)
     # Cabin (glass)
-    cab_start = max(1, length // 2 - 1)
+    cab_start = min(max(1, length // 2 - 1), max(1, length - 2))
     mc.setBlocks(x + cab_start, y + 2, z, x + cab_start + 1, y + 3, z + 1, block_constants.GLASS.id)
     # Roof
     mc.setBlocks(x + cab_start, y + 4, z, x + cab_start + 1, y + 4, z + 1, block_constants.IRON_BLOCK.id)
     # Headlights (glowstone)
     mc.setBlock(x, y + 2, z, block_constants.GLOWSTONE_BLOCK.id)
-    mc.setBlock(x + length, y + 2, z + 1, block_constants.GLOWSTONE_BLOCK.id)
+    mc.setBlock(x2, y + 2, z + 1, block_constants.GLOWSTONE_BLOCK.id)
 
 
 def build_car_buggy(mc, x, y, z):
@@ -259,6 +257,76 @@ def build_rocket(mc, x, y, z, height=6):
     mc.setBlock(x, y + height, z, block_constants.GLOWSTONE_BLOCK.id)
     # Flame (orange wool)
     mc.setBlocks(x, y - 1, z, x, y - 2, z, block_constants.WOOL.id, 1)
+
+
+def build_rainbow_arch(mc, x, y, z, radius=5):
+    """Colorful wool arch that works like a simple rainbow tunnel."""
+    colors = [14, 1, 4, 5, 3, 11, 10]
+    for offset, wool_color in enumerate(colors):
+        r = radius - offset
+        if r < 1:
+            break
+        for dy in range(r + 1):
+            dx = r - dy
+            mc.setBlock(x - dx, y + dy, z, block_constants.WOOL.id, wool_color)
+            mc.setBlock(x + dx, y + dy, z, block_constants.WOOL.id, wool_color)
+
+
+def build_tree_oak(mc, x, y, z, height=5):
+    """Chunky oak-style tree with a leafy canopy and a tiny apple."""
+    trunk_top = y + height - 1
+    mc.setBlocks(x, y, z, x, trunk_top, z, block_constants.WOOD.id)
+    mc.setBlocks(x - 2, trunk_top - 1, z - 2, x + 2, trunk_top + 1, z + 2, block_constants.LEAVES.id)
+    mc.setBlocks(x - 1, trunk_top + 2, z - 1, x + 1, trunk_top + 2, z + 1, block_constants.LEAVES.id)
+    mc.setBlock(x + 1, trunk_top, z + 2, block_constants.WOOL.id, 14)
+
+
+def build_castle_gate(mc, x, y, z, width=7, height=5):
+    """Small castle gate with two towers and a central archway."""
+    tower_height = height + 2
+    left_x = x
+    right_x = x + width - 1
+    gate_left = x + 2
+    gate_right = x + width - 3
+
+    mc.setBlocks(left_x, y, z, left_x + 1, y + tower_height - 1, z + 1, block_constants.STONE_BRICK.id)
+    mc.setBlocks(right_x - 1, y, z, right_x, y + tower_height - 1, z + 1, block_constants.STONE_BRICK.id)
+    mc.setBlocks(gate_left, y + height - 1, z, gate_right, y + height, z + 1, block_constants.STONE_BRICK.id)
+    mc.setBlocks(gate_left, y, z, gate_right, y + height - 2, z + 1, block_constants.AIR.id)
+    mc.setBlocks(left_x, y + tower_height, z, left_x + 1, y + tower_height, z + 1, block_constants.STONE_SLAB.id)
+    mc.setBlocks(right_x - 1, y + tower_height, z, right_x, y + tower_height, z + 1, block_constants.STONE_SLAB.id)
+    mc.setBlock(left_x + 1, y + tower_height - 1, z, block_constants.TORCH.id)
+    mc.setBlock(right_x - 1, y + tower_height - 1, z, block_constants.TORCH.id)
+
+
+def build_smiley_pixel_art(mc, x, y, z, size=7):
+    """Flat smiley face pixel art on a wool background."""
+    s = max(5, size)
+    x2 = x + s - 1
+    y2 = y + s - 1
+    mc.setBlocks(x, y, z, x2, y2, z, block_constants.WOOL.id, 4)
+    mc.setBlocks(x + 1, y + 1, z, x2 - 1, y2 - 1, z, block_constants.WOOL.id, 0)
+
+    eye_y = y + s - 3
+    mc.setBlock(x + 1, eye_y, z, block_constants.WOOL.id, 15)
+    mc.setBlock(x2 - 1, eye_y, z, block_constants.WOOL.id, 15)
+
+    mouth_y = y + 1
+    mc.setBlocks(x + 1, mouth_y, z, x2 - 1, mouth_y, z, block_constants.WOOL.id, 15)
+    mc.setBlock(x, mouth_y + 1, z, block_constants.WOOL.id, 15)
+    mc.setBlock(x2, mouth_y + 1, z, block_constants.WOOL.id, 15)
+
+
+def build_campfire(mc, x, y, z):
+    """Tiny campfire with logs, stones, and a warm glow."""
+    mc.setBlocks(x - 1, y, z - 1, x + 1, y, z + 1, block_constants.COBBLESTONE.id)
+    mc.setBlock(x, y + 1, z, block_constants.FIRE.id)
+    mc.setBlock(x, y, z, block_constants.WOOD.id)
+    mc.setBlock(x - 1, y, z, block_constants.WOOD.id)
+    mc.setBlock(x + 1, y, z, block_constants.WOOD.id)
+    mc.setBlock(x, y, z - 1, block_constants.WOOD.id)
+    mc.setBlock(x, y, z + 1, block_constants.WOOD.id)
+    mc.setBlock(x, y + 2, z, block_constants.TORCH.id)
 
 
 # --- Mobs (blocky Minecraft-style) ---
@@ -362,21 +430,24 @@ def build_mob_zombie(mc, x, y, z):
 
 def build_terrarium(mc, x, y, z, width=50, depth=50, height=20):
     """Big glass terrarium: floor, ceiling, four walls, hollow inside (50×50×20 default)."""
+    x2 = x + width - 1
+    z2 = z + depth - 1
+    y2 = y + height - 1
     # Floor (stone so it's solid)
-    mc.setBlocks(x, y, z, x + width, y, z + depth, block_constants.STONE.id)
+    mc.setBlocks(x, y, z, x2, y, z2, block_constants.STONE.id)
     # Ceiling (glass)
-    mc.setBlocks(x, y + height, z, x + width, y + height, z + depth, block_constants.GLASS.id)
+    mc.setBlocks(x, y2, z, x2, y2, z2, block_constants.GLASS.id)
     # Four walls (glass): front and back (along x), left and right (along z)
     # Wall at z (front)
-    mc.setBlocks(x, y + 1, z, x + width, y + height - 1, z, block_constants.GLASS.id)
+    mc.setBlocks(x, y + 1, z, x2, y2 - 1, z, block_constants.GLASS.id)
     # Wall at z + depth (back)
-    mc.setBlocks(x, y + 1, z + depth, x + width, y + height - 1, z + depth, block_constants.GLASS.id)
+    mc.setBlocks(x, y + 1, z2, x2, y2 - 1, z2, block_constants.GLASS.id)
     # Wall at x (left)
-    mc.setBlocks(x, y + 1, z, x, y + height - 1, z + depth, block_constants.GLASS.id)
+    mc.setBlocks(x, y + 1, z, x, y2 - 1, z2, block_constants.GLASS.id)
     # Wall at x + width (right)
-    mc.setBlocks(x + width, y + 1, z, x + width, y + height - 1, z + depth, block_constants.GLASS.id)
+    mc.setBlocks(x2, y + 1, z, x2, y2 - 1, z2, block_constants.GLASS.id)
     # Hollow interior (air) — floor at y+1, up to y+height-1
-    mc.setBlocks(x + 1, y + 1, z + 1, x + width - 1, y + height - 1, z + depth - 1, block_constants.AIR.id)
+    mc.setBlocks(x + 1, y + 1, z + 1, x2 - 1, y2 - 1, z2 - 1, block_constants.AIR.id)
 
 
 # Mob build functions that can be placed inside terrarium (id, fn)
@@ -401,9 +472,10 @@ def populate_terrarium_mobs(mc, x, y, z, width=50, depth=50, height=20, count=15
     y_floor = y + 1
     if x_max <= x_min or z_max <= z_min:
         mc.postToChat("Terrarium too small to place mobs")
-        return 0
+        return {"placed": 0, "failed": 0, "errors": ["Terrarium too small to place mobs."]}
     builders = list(_TERRARIUM_MOB_BUILDERS)
     placed = 0
+    failures = []
     for _ in range(int(count)):
         px = random.randint(x_min, x_max)
         pz = random.randint(z_min, z_max)
@@ -411,9 +483,9 @@ def populate_terrarium_mobs(mc, x, y, z, width=50, depth=50, height=20, count=15
         try:
             build_fn(mc, px, y_floor, pz)
             placed += 1
-        except Exception:
-            pass
-    return placed
+        except Exception as exc:
+            failures.append(f"{name} at ({px}, {y_floor}, {pz}): {exc}")
+    return {"placed": placed, "failed": len(failures), "errors": failures}
 
 
 # --- Registry for the Streamlit UI ---
@@ -595,6 +667,49 @@ BUILDS = [
         "fn": build_rocket,
         "uses_stuff": False,
         "params": [("height", "int", 6, "Body height (blocks)")],
+    },
+    {
+        "id": "rainbow_arch",
+        "name": "Rainbow Arch",
+        "description": "Colorful wool rainbow arch",
+        "fn": build_rainbow_arch,
+        "uses_stuff": False,
+        "params": [("radius", "int", 5, "Arch radius (blocks)")],
+    },
+    {
+        "id": "tree_oak",
+        "name": "Oak Tree",
+        "description": "Chunky oak-style tree with a leafy canopy",
+        "fn": build_tree_oak,
+        "uses_stuff": False,
+        "params": [("height", "int", 5, "Trunk height (blocks)")],
+    },
+    {
+        "id": "castle_gate",
+        "name": "Castle Gate",
+        "description": "Two towers with a central gate arch",
+        "fn": build_castle_gate,
+        "uses_stuff": False,
+        "params": [
+            ("width", "int", 7, "Gate width (blocks)"),
+            ("height", "int", 5, "Arch height (blocks)"),
+        ],
+    },
+    {
+        "id": "smiley_pixel_art",
+        "name": "Smiley Pixel Art",
+        "description": "Flat smiley face for walls or signs",
+        "fn": build_smiley_pixel_art,
+        "uses_stuff": False,
+        "params": [("size", "int", 7, "Canvas size (blocks)")],
+    },
+    {
+        "id": "campfire",
+        "name": "Campfire",
+        "description": "Small stone-ring campfire with glowing center",
+        "fn": build_campfire,
+        "uses_stuff": False,
+        "params": [],
     },
     # --- Mobs ---
     {

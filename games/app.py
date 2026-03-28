@@ -175,6 +175,11 @@ BUILD_ICONS = {
     "car_simple": "🚗",
     "car_buggy": "🚙",
     "rocket": "🚀",
+    "rainbow_arch": "🌈",
+    "tree_oak": "🌳",
+    "castle_gate": "🏰",
+    "smiley_pixel_art": "🙂",
+    "campfire": "🔥",
     "mob_creeper": "💚",
     "mob_pig": "🐷",
     "mob_sheep": "🐑",
@@ -403,10 +408,10 @@ def render_app():
             action_col, sync_col = st.columns([3, 1])
             with action_col:
                 place_block_label = st.selectbox(
-                    "Brick type",
+                    "Block type",
                     options=_block_display_options(),
                     key="place_block_select",
-                    help="Choose a preset, or override the numeric ID below.",
+                    help="Choose a known block ID preset. Some blocks also use the block data value below.",
                 )
             with sync_col:
                 st.write("")
@@ -458,7 +463,7 @@ def render_app():
                         key="place_spread_count",
                     )
 
-            if st.button("Place brick", type="primary", key="place_block_btn"):
+            if st.button("Place block", type="primary", key="place_block_btn"):
                 try:
                     placed = 0
                     for _ in range(spread_count):
@@ -469,7 +474,7 @@ def render_app():
                             z += random.randint(-spread_radius, spread_radius)
                         mc.setBlock(x, place_y, z, int(place_block_id), int(place_block_data))
                         placed += 1
-                    st.success(f"Placed {placed} brick{'s' if placed != 1 else ''}.")
+                    st.success(f"Placed {placed} block{'s' if placed != 1 else ''}.")
                 except Exception as exc:
                     _store_browser_error(_format_exception("Block placement failed", exc))
                     st.error(str(exc))
@@ -545,7 +550,7 @@ def render_app():
                 mob_count = st.slider("Mob count", min_value=1, max_value=50, value=15, key="terr_mob_count")
                 if st.button("Spawn mobs", type="primary", key="terr_spawn"):
                     try:
-                        placed = populate_terrarium_mobs(
+                        result = populate_terrarium_mobs(
                             mc,
                             tx,
                             ty,
@@ -555,7 +560,20 @@ def render_app():
                             height=int(th),
                             count=mob_count,
                         )
-                        st.success(f"Placed {placed} mobs.")
+                        placed = int(result["placed"])
+                        failed = int(result["failed"])
+                        errors = result["errors"]
+                        if placed:
+                            st.success(f"Placed {placed} mob build{'s' if placed != 1 else ''}.")
+                        if failed:
+                            summary = f"{failed} mob placement{'s' if failed != 1 else ''} failed."
+                            _store_browser_error("Terrarium mob placement issues\n" + "\n".join(errors[:10]))
+                            st.warning(summary)
+                            with st.expander("Show terrarium placement errors", expanded=False):
+                                for error in errors:
+                                    st.code(error, language="text")
+                        if not placed and not failed:
+                            st.info("No mobs were placed.")
                     except Exception as exc:
                         _store_browser_error(_format_exception("Terrarium mob placement failed", exc))
                         st.error(str(exc))

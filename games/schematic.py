@@ -7,6 +7,7 @@ from __future__ import annotations
 import gzip
 import io
 import struct
+from collections import Counter
 
 
 TAG_END = 0
@@ -145,7 +146,44 @@ def load_schematic(file_bytes: bytes):
     }
 
 
+def normalize_schematic(schematic):
+    if not isinstance(schematic, dict):
+        raise ValueError("Uploaded schematic data is not in the expected format.")
+
+    normalized = {
+        "width": schematic.get("width", schematic.get("Width")),
+        "height": schematic.get("height", schematic.get("Height")),
+        "length": schematic.get("length", schematic.get("Length")),
+        "materials": schematic.get("materials", schematic.get("Materials", "Unknown")),
+        "blocks": schematic.get("blocks", schematic.get("Blocks")),
+        "data": schematic.get("data", schematic.get("Data")),
+    }
+
+    missing = [key for key in ("width", "height", "length", "blocks", "data") if normalized[key] is None]
+    if missing:
+        raise ValueError(
+            "This file does not look like a supported MCEdit .schematic file. "
+            f"Missing field(s): {', '.join(missing)}."
+        )
+
+    normalized["width"] = int(normalized["width"])
+    normalized["height"] = int(normalized["height"])
+    normalized["length"] = int(normalized["length"])
+    normalized["blocks"] = list(normalized["blocks"])
+    normalized["data"] = list(normalized["data"])
+
+    expected = normalized["width"] * normalized["height"] * normalized["length"]
+    if len(normalized["blocks"]) != expected or len(normalized["data"]) != expected:
+        raise ValueError(
+            "Schematic block data size does not match its dimensions. "
+            f"Expected {expected} entries, got {len(normalized['blocks'])} blocks and {len(normalized['data'])} data values."
+        )
+
+    return normalized
+
+
 def iter_schematic_blocks(schematic):
+    schematic = normalize_schematic(schematic)
     width = schematic["width"]
     height = schematic["height"]
     length = schematic["length"]
@@ -160,6 +198,7 @@ def iter_schematic_blocks(schematic):
 
 
 def place_schematic(mc, origin_x: int, origin_y: int, origin_z: int, schematic, allowed_block_ids, fallback_block_id):
+    schematic = normalize_schematic(schematic)
     placed = 0
     replaced = 0
     skipped = 0
@@ -186,4 +225,21 @@ def place_schematic(mc, origin_x: int, origin_y: int, origin_z: int, schematic, 
         "placed": placed,
         "replaced": replaced,
         "skipped": skipped,
+    }
+
+
+def summarize_schematic(schematic, allowed_block_ids):
+    schematic = normalize_schematic(schematic)
+    counts = Counter(block_id for block_id in schematic["blocks"] if block_id != 0)
+    unsupported = {block_id: count for block_id, count in counts.items() if block_id not in allowed_block_ids}
+
+    return {
+        "dimensions": (schematic["width"], schematic["height"], schematic["length"]),
+        "materials": schematic["materials"],
+        "non_air_blocks": int(sum(counts.values())),
+        "unique_non_air_blocks": len(counts),
+        "unsupported_unique_blocks": len(unsupported),
+        "unsupported_total_blocks": int(sum(unsupported.values())),
+        "top_blocks": counts.most_common(10),
+        "top_unsupported_blocks": sorted(unsupported.items(), key=lambda item: item[1], reverse=True)[:10],
     }

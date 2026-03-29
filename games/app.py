@@ -13,7 +13,7 @@ import traceback
 import streamlit as st
 
 from builds import BUILDS, get_build, populate_terrarium_mobs
-from schematic import load_schematic, place_schematic
+from schematic import load_schematic, normalize_schematic, place_schematic, summarize_schematic
 
 
 BLOCK_REF = {
@@ -550,7 +550,7 @@ def render_app():
 
                 if uploaded_schematic is not None:
                     try:
-                        schematic = load_schematic(uploaded_schematic.getvalue())
+                        schematic = normalize_schematic(load_schematic(uploaded_schematic.getvalue()))
                         st.session_state.loaded_schematic = schematic
                         st.session_state.loaded_schematic_name = uploaded_schematic.name
                     except Exception as exc:
@@ -563,12 +563,51 @@ def render_app():
                 schematic_name = st.session_state.get("loaded_schematic_name")
 
                 if schematic:
-                    st.info(
-                        f"Loaded `{schematic_name}` "
-                        f"({schematic['width']} x {schematic['height']} x {schematic['length']}, "
-                        f"materials: {schematic['materials']})."
-                    )
+                    try:
+                        schematic = normalize_schematic(schematic)
+                        st.session_state.loaded_schematic = schematic
+                        schematic_summary = summarize_schematic(schematic, set(BLOCK_REF.values()))
+                        st.info(
+                            f"Loaded `{schematic_name}` "
+                            f"({schematic['width']} x {schematic['height']} x {schematic['length']}, "
+                            f"materials: {schematic['materials']})."
+                        )
+                        stats_cols = st.columns(4)
+                        stats_cols[0].metric("Non-air blocks", schematic_summary["non_air_blocks"])
+                        stats_cols[1].metric("Unique block IDs", schematic_summary["unique_non_air_blocks"])
+                        stats_cols[2].metric("Unsupported IDs", schematic_summary["unsupported_unique_blocks"])
+                        stats_cols[3].metric("Unsupported blocks", schematic_summary["unsupported_total_blocks"])
 
+                        with st.expander("Show schematic stats", expanded=False):
+                            st.caption("Most common block IDs in this file")
+                            st.dataframe(
+                                [
+                                    {"block_id": block_id, "count": count}
+                                    for block_id, count in schematic_summary["top_blocks"]
+                                ],
+                                use_container_width=True,
+                                hide_index=True,
+                            )
+                            if schematic_summary["top_unsupported_blocks"]:
+                                st.caption("Most common unsupported block IDs for Minecraft Pi")
+                                st.dataframe(
+                                    [
+                                        {"block_id": block_id, "count": count}
+                                        for block_id, count in schematic_summary["top_unsupported_blocks"]
+                                    ],
+                                    use_container_width=True,
+                                    hide_index=True,
+                                )
+                            else:
+                                st.success("All non-air blocks in this schematic are supported by Minecraft Pi.")
+                    except Exception as exc:
+                        st.session_state.pop("loaded_schematic", None)
+                        st.session_state.pop("loaded_schematic_name", None)
+                        _store_browser_error(_format_exception("Schematic validation failed", exc))
+                        st.error(str(exc))
+                        schematic = None
+
+                if schematic:
                     import_col, sync_col = st.columns([3, 1])
                     with import_col:
                         st.caption("Import position")

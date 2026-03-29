@@ -13,6 +13,7 @@ import traceback
 import streamlit as st
 
 from builds import BUILDS, get_build, populate_terrarium_mobs
+from schematic import load_schematic, place_schematic
 
 
 BLOCK_REF = {
@@ -379,6 +380,18 @@ def _sync_selected_block_defaults():
         st.session_state["place_block_select_previous"] = selected_key
 
 
+def _entity_type_options(mc):
+    entity_types = mc.getEntityTypes()
+    return {
+        f"{entity.id}: {entity.name}": entity.id
+        for entity in entity_types
+    }
+
+
+def _fallback_block_options():
+    return ["Skip unsupported blocks"] + [f"{BLOCK_ICONS.get(name, '⬜')} {name}" for name in BLOCK_REF]
+
+
 def render_app():
     _render_browser_errors()
 
@@ -399,7 +412,7 @@ def render_app():
         else:
             st.warning(st.session_state.mc_error or "Not connected")
 
-    tab_blocks, tab_builds, tab_player = st.tabs(["Blocks", "Builds", "Player"])
+    tab_blocks, tab_builds, tab_entities, tab_player = st.tabs(["Blocks", "Builds", "Entities", "Player"])
 
     with tab_blocks:
         st.subheader("Blocks")
@@ -524,6 +537,80 @@ def render_app():
                         _store_browser_error(_format_exception(f"Build placement failed: {build['name']}", exc))
                         st.error(str(exc))
 
+            with st.expander("Import .schematic file"):
+                st.caption("Upload a classic MCEdit .schematic file and place it in the world.")
+                st.markdown("[Browse schematics on mcbuild.org](https://mcbuild.org/schematics)")
+
+                uploaded_schematic = st.file_uploader(
+                    "Schematic file",
+                    type=["schematic"],
+                    key="schematic_upload",
+                    help="The file stays local to this session unless you place it.",
+                )
+
+                if uploaded_schematic is not None:
+                    try:
+                        schematic = load_schematic(uploaded_schematic.getvalue())
+                        st.session_state.loaded_schematic = schematic
+                        st.session_state.loaded_schematic_name = uploaded_schematic.name
+                    except Exception as exc:
+                        st.session_state.pop("loaded_schematic", None)
+                        st.session_state.pop("loaded_schematic_name", None)
+                        _store_browser_error(_format_exception("Schematic load failed", exc))
+                        st.error(str(exc))
+
+                schematic = st.session_state.get("loaded_schematic")
+                schematic_name = st.session_state.get("loaded_schematic_name")
+
+                if schematic:
+                    st.info(
+                        f"Loaded `{schematic_name}` "
+                        f"({schematic['width']} x {schematic['height']} x {schematic['length']}, "
+                        f"materials: {schematic['materials']})."
+                    )
+
+                    import_col, sync_col = st.columns([3, 1])
+                    with import_col:
+                        st.caption("Import position")
+                    with sync_col:
+                        st.write("")
+                        if st.button("Sync position", key="schem_sync_btn", use_container_width=True):
+                            _sync_position_from_player(mc, "schem")
+                            st.rerun()
+
+                    schem_x, schem_y, schem_z = _position_inputs("schem", _get_player_tile_pos(mc))
+
+                    fallback_label = st.selectbox(
+                        "Unsupported blocks",
+                        options=_fallback_block_options(),
+                        key="schematic_fallback_select",
+                        help="Minecraft Pi supports only older block IDs. Unsupported blocks can be skipped or replaced.",
+                    )
+
+                    if st.button("Place schematic", type="primary", key="place_schematic_btn"):
+                        try:
+                            fallback_block_id = None
+                            if fallback_label != "Skip unsupported blocks":
+                                fallback_block_id = BLOCK_REF[_block_label_to_key(fallback_label)]
+
+                            result = place_schematic(
+                                mc,
+                                schem_x,
+                                schem_y,
+                                schem_z,
+                                schematic,
+                                allowed_block_ids=set(BLOCK_REF.values()),
+                                fallback_block_id=fallback_block_id,
+                            )
+                            st.success(f"Placed {result['placed']} schematic blocks.")
+                            if result["replaced"]:
+                                st.warning(f"Replaced {result['replaced']} unsupported block(s) with the fallback block.")
+                            if result["skipped"]:
+                                st.warning(f"Skipped {result['skipped']} unsupported block(s).")
+                        except Exception as exc:
+                            _store_browser_error(_format_exception("Schematic placement failed", exc))
+                            st.error(str(exc))
+
             with st.expander("Terrarium mobs"):
                 st.caption("Use this after placing the terrarium build.")
                 terr_default_pos = (
@@ -577,6 +664,109 @@ def render_app():
                     except Exception as exc:
                         _store_browser_error(_format_exception("Terrarium mob placement failed", exc))
                         st.error(str(exc))
+        else:
+            st.info("Connect to Minecraft first.")
+
+    with tab_entities:
+        st.subheader("Entities")
+        st.caption("Spawn supported entities, inspect loaded entities, or remove them.")
+
+        if mc:
+            try:
+                entity_options = _entity_type_options(mc)
+            except Exception as exc:
+                _store_browser_error(_format_exception("Entity type lookup failed", exc))
+                st.error(str(exc))
+                entity_options = {}
+
+            default_pos = _get_player_tile_pos(mc)
+            action_col, sync_col = st.columns([3, 1])
+            with action_col:
+                entity_label = st.selectbox(
+                    "Entity type",
+                    options=list(entity_options.keys()),
+                    key="entity_type_select",
+                    help="Entity IDs come from the connected server.",
+                ) if entity_options else None
+            with sync_col:
+                st.write("")
+                st.write("")
+                if st.button("Sync position", key="entity_sync_btn", use_container_width=True):
+                    _sync_position_from_player(mc, "entity")
+                    st.rerun()
+
+            entity_x, entity_y, entity_z = _position_inputs("entity", default_pos)
+
+            if st.button("Spawn entity", type="primary", key="spawn_entity_btn", disabled=not entity_options):
+                try:
+                    entity_id = entity_options[entity_label]
+                    spawned_id = mc.spawnEntity(entity_x, entity_y, entity_z, int(entity_id))
+                    st.success(f"Spawned entity {entity_label} with id {spawned_id}.")
+                except Exception as exc:
+                    _store_browser_error(_format_exception("Entity spawn failed", exc))
+                    st.error(str(exc))
+
+            st.divider()
+
+            list_col, filter_col = st.columns([2, 1])
+            with filter_col:
+                type_filter = st.checkbox("Filter by selected type", value=False, key="entity_filter_selected_type")
+            with list_col:
+                if st.button("Refresh loaded entities", key="refresh_entities_btn"):
+                    st.session_state.pop("loaded_entities", None)
+
+            try:
+                filter_id = entity_options[entity_label] if (entity_options and entity_label and type_filter) else -1
+                loaded_entities = mc.getEntities(int(filter_id))
+                st.session_state.loaded_entities = loaded_entities
+            except Exception as exc:
+                _store_browser_error(_format_exception("Entity list failed", exc))
+                st.error(str(exc))
+                loaded_entities = st.session_state.get("loaded_entities", [])
+
+            st.caption(f"Loaded entities: {len(loaded_entities)}")
+            if loaded_entities:
+                entity_rows = [
+                    {
+                        "entity_id": entity[0],
+                        "type_id": entity[1],
+                        "type_name": entity[2],
+                        "x": entity[3],
+                        "y": entity[4],
+                        "z": entity[5],
+                    }
+                    for entity in loaded_entities
+                ]
+                st.dataframe(entity_rows, use_container_width=True, hide_index=True)
+
+                remove_col, remove_type_col = st.columns(2)
+                with remove_col:
+                    entity_ids = [row["entity_id"] for row in entity_rows]
+                    selected_remove_id = st.selectbox("Remove one entity", options=entity_ids, key="remove_entity_id")
+                    if st.button("Remove selected entity", key="remove_entity_btn", use_container_width=True):
+                        try:
+                            removed = mc.removeEntity(int(selected_remove_id))
+                            st.success(f"Removed {removed} entity.")
+                        except Exception as exc:
+                            _store_browser_error(_format_exception("Remove entity failed", exc))
+                            st.error(str(exc))
+
+                with remove_type_col:
+                    remove_type_label = st.selectbox(
+                        "Remove by type",
+                        options=["All loaded entities"] + list(entity_options.keys()),
+                        key="remove_entity_type_select",
+                    )
+                    if st.button("Remove by type", key="remove_entities_by_type_btn", use_container_width=True):
+                        try:
+                            remove_type_id = -1 if remove_type_label == "All loaded entities" else entity_options[remove_type_label]
+                            removed = mc.removeEntities(int(remove_type_id))
+                            st.success(f"Removed {removed} entit{'y' if removed == 1 else 'ies'}.")
+                        except Exception as exc:
+                            _store_browser_error(_format_exception("Remove entities by type failed", exc))
+                            st.error(str(exc))
+            else:
+                st.info("No loaded entities found.")
         else:
             st.info("Connect to Minecraft first.")
 

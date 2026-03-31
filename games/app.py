@@ -813,10 +813,7 @@ def render_app():
                             if schematic_summary["top_unsupported_blocks"]:
                                 st.caption(_t("top_unsupported_blocks"))
                                 st.dataframe(
-                                    [
-                                        {"block_id": block_id, "count": count}
-                                        for block_id, count in schematic_summary["top_unsupported_blocks"]
-                                    ],
+                                    schematic_summary["top_unsupported_blocks"],
                                     use_container_width=True,
                                     hide_index=True,
                                 )

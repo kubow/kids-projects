@@ -504,7 +504,7 @@ def _render_browser_errors():
     with header_cols[0]:
         st.warning(_t("console_errors_captured", count=len(errors)))
     with header_cols[1]:
-        if st.button("Clear", key="clear_browser_errors", use_container_width=True):
+        if st.button("Clear", key="clear_browser_errors", width="stretch"):
             st.session_state.browser_errors = []
             st.rerun()
 
@@ -614,7 +614,7 @@ def render_app():
         host = st.text_input(_t("host"), value="localhost", key="host")
         port = st.number_input(_t("port"), min_value=1, max_value=65535, value=4711, key="port")
 
-        if st.button(_t("connect"), type="primary", use_container_width=True):
+        if st.button(_t("connect"), type="primary", width="stretch"):
             with st.spinner(_t("connecting")):
                 connect_minecraft(host, int(port))
 
@@ -646,7 +646,7 @@ def render_app():
             with sync_col:
                 st.write("")
                 st.write("")
-                if st.button(_t("sync_position"), key="place_sync_btn", use_container_width=True):
+                if st.button(_t("sync_position"), key="place_sync_btn", width="stretch"):
                     _sync_position_from_player(mc, "place")
                     st.rerun()
 
@@ -733,7 +733,7 @@ def render_app():
                 with sync_col:
                     st.write("")
                     st.write("")
-                    if st.button(_t("sync_position"), key="build_sync_btn", use_container_width=True):
+                    if st.button(_t("sync_position"), key="build_sync_btn", width="stretch"):
                         _sync_position_from_player(mc, "build")
                         st.rerun()
 
@@ -807,14 +807,14 @@ def render_app():
                                     {"block_id": block_id, "count": count}
                                     for block_id, count in schematic_summary["top_blocks"]
                                 ],
-                                use_container_width=True,
+                                width="stretch",
                                 hide_index=True,
                             )
                             if schematic_summary["top_unsupported_blocks"]:
                                 st.caption(_t("top_unsupported_blocks"))
                                 st.dataframe(
                                     schematic_summary["top_unsupported_blocks"],
-                                    use_container_width=True,
+                                    width="stretch",
                                     hide_index=True,
                                 )
                             else:
@@ -832,7 +832,7 @@ def render_app():
                         st.caption(_t("import_position"))
                     with sync_col:
                         st.write("")
-                        if st.button(_t("sync_position"), key="schem_sync_btn", use_container_width=True):
+                        if st.button(_t("sync_position"), key="schem_sync_btn", width="stretch"):
                             _sync_position_from_player(mc, "schem")
                             st.rerun()
 
@@ -949,7 +949,7 @@ def render_app():
             with sync_col:
                 st.write("")
                 st.write("")
-                if st.button(_t("sync_position"), key="entity_sync_btn", use_container_width=True):
+                if st.button(_t("sync_position"), key="entity_sync_btn", width="stretch"):
                     _sync_position_from_player(mc, "entity")
                     st.rerun()
 
@@ -995,13 +995,13 @@ def render_app():
                     }
                     for entity in loaded_entities
                 ]
-                st.dataframe(entity_rows, use_container_width=True, hide_index=True)
+                st.dataframe(entity_rows, width="stretch", hide_index=True)
 
                 remove_col, remove_type_col = st.columns(2)
                 with remove_col:
                     entity_ids = [row["entity_id"] for row in entity_rows]
                     selected_remove_id = st.selectbox(_t("remove_one_entity"), options=entity_ids, key="remove_entity_id")
-                    if st.button(_t("remove_selected_entity"), key="remove_entity_btn", use_container_width=True):
+                    if st.button(_t("remove_selected_entity"), key="remove_entity_btn", width="stretch"):
                         try:
                             removed = mc.removeEntity(int(selected_remove_id))
                             st.success(_t("removed_entity", count=removed))
@@ -1015,7 +1015,7 @@ def render_app():
                         options=[_t("remove_all_loaded_entities")] + list(entity_options.keys()),
                         key="remove_entity_type_select",
                     )
-                    if st.button(_t("remove_by_type_button"), key="remove_entities_by_type_btn", use_container_width=True):
+                    if st.button(_t("remove_by_type_button"), key="remove_entities_by_type_btn", width="stretch"):
                         try:
                             remove_type_id = -1 if remove_type_label == _t("remove_all_loaded_entities") else entity_options[remove_type_label]
                             removed = mc.removeEntities(int(remove_type_id))

@@ -117,14 +117,29 @@ def _decompress_schematic_bytes(data: bytes) -> bytes:
 def load_schematic(file_bytes: bytes):
     raw = _decompress_schematic_bytes(file_bytes)
     _, root = NBTReader(raw).read_named_root()
+    width = root.get("Width", root.get("width"))
+    height = root.get("Height", root.get("height"))
+    length = root.get("Length", root.get("length"))
+    blocks = root.get("Blocks", root.get("blocks"))
+    data = root.get("Data", root.get("data"))
+    materials = root.get("Materials", root.get("materials", "Unknown"))
+    add_blocks = root.get("AddBlocks", root.get("addBlocks"))
 
-    width = int(root["Width"])
-    height = int(root["Height"])
-    length = int(root["Length"])
-    blocks = root["Blocks"]
-    data = root["Data"]
-    materials = root.get("Materials", "Unknown")
-    add_blocks = root.get("AddBlocks")
+    missing = [
+        key for key, value in {
+            "Width": width,
+            "Height": height,
+            "Length": length,
+            "Blocks": blocks,
+            "Data": data,
+        }.items()
+        if value is None
+    ]
+    if missing:
+        raise ValueError(
+            "This file does not look like a supported MCEdit .schematic file. "
+            f"Missing field(s): {', '.join(missing)}."
+        )
 
     if add_blocks:
         merged_blocks = []

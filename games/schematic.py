@@ -234,10 +234,35 @@ def _decode_packed_blockstates(values, palette_size: int, total_blocks: int):
 def _palette_entry_to_block(entry, index: int):
     name = entry.get("Name", f"palette:{index}")
     mapped = MODERN_BLOCK_MAP.get(name)
+    if mapped is None and "[" in name:
+        mapped = MODERN_BLOCK_MAP.get(name.split("[", 1)[0])
     if mapped is not None:
         block_id, block_data = mapped
         return block_id, block_data, name
     return 1000 + index, 0, name
+
+
+def _decode_varints(data_bytes: bytes, total_values: int):
+    values = []
+    value = 0
+    shift = 0
+
+    for byte in data_bytes:
+        value |= (byte & 0x7F) << shift
+        if byte & 0x80:
+            shift += 7
+            continue
+        values.append(value)
+        if len(values) == total_values:
+            return values
+        value = 0
+        shift = 0
+
+    if len(values) != total_values:
+        raise ValueError(
+            f"VarInt block data ended early. Expected {total_values} values, got {len(values)}."
+        )
+    return values
 
 
 def _load_region_schematic(root):
@@ -282,11 +307,49 @@ def _load_region_schematic(root):
     }
 
 
+def _load_palette_schematic(root):
+    width = int(root["Width"])
+    height = int(root["Height"])
+    length = int(root["Length"])
+    total_blocks = width * height * length
+
+    palette_dict = root["Palette"]
+    block_data = root["BlockData"]
+    palette_entries = sorted(palette_dict.items(), key=lambda item: int(item[1]))
+    palette_names = {}
+    palette_map = {}
+
+    for palette_name, palette_index in palette_entries:
+        block_id, block_data_value, block_name = _palette_entry_to_block({"Name": palette_name}, int(palette_index))
+        palette_map[int(palette_index)] = (block_id, block_data_value)
+        palette_names[block_id] = block_name
+
+    state_indices = _decode_varints(block_data, total_blocks)
+    blocks = []
+    data = []
+    for state_index in state_indices:
+        block_id, block_data_value = palette_map.get(state_index, (0, 0))
+        blocks.append(block_id)
+        data.append(block_data_value)
+
+    return {
+        "width": width,
+        "height": height,
+        "length": length,
+        "materials": f"Palette v{root.get('Version', '?')}",
+        "blocks": blocks,
+        "data": data,
+        "block_names": palette_names,
+    }
+
+
 def load_schematic(file_bytes: bytes):
     raw = _decompress_schematic_bytes(file_bytes)
     _, root = NBTReader(raw).read_named_root()
     if "Regions" in root:
         return _load_region_schematic(root)
+    if "Palette" in root and "BlockData" in root:
+        return _load_palette_schematic(root)
     width = root.get("Width", root.get("width"))
     height = root.get("Height", root.get("height"))
     length = root.get("Length", root.get("length"))

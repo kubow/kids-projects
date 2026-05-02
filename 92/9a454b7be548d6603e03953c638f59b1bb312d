@@ -1,0 +1,28 @@
+games/minecraft/README.md
+  956ecb5b487db0ee 1-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "929a454b7be548d6603e03953c638f59b1bb312d",
+  "prompts": {
+    "956ecb5b487db0ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019de7fd-1836-7ac3-afeb-597835a9bb88",
+        "model": "gpt-5.4"
+      },
+      "human_author": "kubow",
+      "messages": [],
+      "total_additions": 160,
+      "total_deletions": 44,
+      "accepted_lines": 116,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_48e40f5ab776de": {
+      "author": "kubow"
+    }
+  }
+}

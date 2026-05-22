@@ -27,8 +27,8 @@ streamlit run games/minecraft/app.py
 
 Python packages used:
 
-- [`mcpi`](https://pypi.org/project/mcpi/)
-- [`minecraftstuff`](https://pypi.org/project/minecraftstuff/)
+- `[mcpi](https://pypi.org/project/mcpi/)`
+- `[minecraftstuff](https://pypi.org/project/minecraftstuff/)`
 
 Important note:
 
@@ -38,11 +38,13 @@ Important note:
 
 ## Minecraft versions overview
 
+
 | Version | Best for | Main capabilities | Main limitations |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Minecraft Pi Edition** | Learning programming basics on Raspberry Pi | Simple block world, local building, Python/API control, easy automation, lightweight | Very old version, no modern updates, very limited blocks/features, no full Survival experience, not compatible with modern Minecraft multiplayer |
 | **Minecraft Java Edition** | Maximum flexibility, mods, private servers, technical play | Full PC version, huge modding scene, custom servers, snapshots, commands, redstone/community tooling | PC only, no cross-play with Bedrock, setup can be more technical, performance depends more on the computer/modpack |
 | **Minecraft Bedrock Edition** | Easy multiplayer across devices | Cross-play on many devices, Marketplace content, good controller/touch support, smoother console/mobile experience, split-screen on consoles | Limited modding compared with Java, many servers/features depend on Microsoft account/ecosystem, less open for deep customization |
+
 
 ### Minecraft Pi Edition
 
@@ -103,14 +105,19 @@ For a lightweight Linux setup, the cleanest modern path is usually:
 - official Minecraft Java launcher, or
 - Prism Launcher with a minimal Java instance, optionally using Fabric plus Sodium for performance
 
-## Minecraft alternatives overview
+## Related sandbox / UGC options
 
-- [Luanti (formerly Minetest)](https://github.com/luanti-org/luanti) - open source voxel game platform with easy modding and game creation
-- [Luanti downloads](https://www.luanti.org/en/downloads/)
-- [Terasology](https://terasology.org/)
-- [Terasology downloads](https://terasology.org/downloads/)
+Open-source voxel platforms in this repo (see [../README.md](../README.md) for a full comparison):
+
+- [Luanti](../luanti/README.md) — open engine + ContentDB mods; strong on Linux and Pi
+- [Terasology](../terasology/README.md) — Java modules; desktop Linux
+- [Roblox](../roblox/README.md) — commercial UGC platform
+
+Other Minecraft-adjacent links:
+
 - [Minecraft Pi: Reborn](https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn)
 - [Getting Started with Minecraft Pi](https://projects.raspberrypi.org/en/projects/getting-started-with-minecraft-pi/0)
-- [StanislavPetrovV/Minecraft](https://github.com/StanislavPetrovV/Minecraft) - Python and OpenGL voxel engine
-- [fogleman/Craft](https://github.com/fogleman/Craft) - simple Minecraft-like clone in C and OpenGL
+- [StanislavPetrovV/Minecraft](https://github.com/StanislavPetrovV/Minecraft) — Python and OpenGL voxel engine
+- [fogleman/Craft](https://github.com/fogleman/Craft) — simple Minecraft-like clone in C and OpenGL
 - [Freeminer](https://freeminer.org/)
+

@@ -15,5 +15,6 @@
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-streamlit run games/minecraft/app.py
+streamlit run games/minecraft/app.py  # Minecraft
+streamlit run games/luanti/app.py  # Luanti (Miney)
 ```

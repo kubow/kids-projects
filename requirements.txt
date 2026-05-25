@@ -1,3 +1,4 @@
 streamlit>=1.55.0
 mcpi>=1.2.1
 minecraftstuff>=1.0.1
+miney>=0.5.7

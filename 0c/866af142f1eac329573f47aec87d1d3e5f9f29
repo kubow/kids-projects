@@ -1,0 +1,59 @@
+brick/parts.md
+  s_e658e293ba7557::t_e06763da334e30 1,3,5-6,8
+  s_e658e293ba7557::t_ae1e9392d7356c 2,4,7
+brick/README.md
+  s_e658e293ba7557::t_7b23963ec1a73e 1,3,5,11,13,15,18,20,25,27,39
+  s_e658e293ba7557::t_0b9f24f6b819fb 7-10,16,21-23,28-35
+  s_e658e293ba7557::t_aff8d66678a26c 37
+brick/Lego_Creator.md
+  s_e658e293ba7557::t_faaf320e20a812 13-14
+  s_e658e293ba7557::t_e88c97c0e78ebd 1,9-12
+  s_e658e293ba7557::t_2a6e0619b81031 3,5,7
+brick/Seva.md
+  s_e658e293ba7557::t_ffaf69ecc28b63 1,4-6,8,10,12
+  s_e658e293ba7557::t_c76142ad943e0c 3,7,9,11,13
+brick/Lego_Technic.md
+  s_e658e293ba7557::t_b05038f60dc72e 16,23
+  s_e658e293ba7557::t_bccc841af8b5cf 22
+  s_e658e293ba7557::t_a898a7d9be88c0 1,9,14,18-21
+  s_e658e293ba7557::t_6b80f12bec4407 3,5,7,11-13
+brick/Lego_System.md
+  s_e658e293ba7557::t_9b1ded5ba1a403 12
+  s_e658e293ba7557::t_2fdc0ce78b783e 1,7,10
+  s_e658e293ba7557::t_5b2f02114926ea 3,5,9
+brick/brio.md
+  s_e658e293ba7557::t_0c5c47001b37be 3,5,9,11
+  s_e658e293ba7557::t_31c766fbed83c8 1,4,6-8,10
+brick/Lego_Education.md
+  s_e658e293ba7557::t_8ae1a76d276316 1,3,5,12,14
+  s_e658e293ba7557::t_cb34547dafc17a 2,4,6-11,13
+brick/Lego_City.md
+  s_e658e293ba7557::t_6516d5b0870d83 16,21
+  s_e658e293ba7557::t_2387b8fac481b2 13,15,22
+  s_e658e293ba7557::t_eafdb631a571a1 9,12,14,17-18,20
+  s_e658e293ba7557::t_6771ba79b1ddb3 3,5,7,11,19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "0c866af142f1eac329573f47aec87d1d3e5f9f29",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    },
+    "h_48e40f5ab776de": {
+      "author": "kubow"
+    }
+  },
+  "sessions": {
+    "s_e658e293ba7557": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3370631d-b4df-4b82-9fdb-c777d137ae7e",
+        "model": "default"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}

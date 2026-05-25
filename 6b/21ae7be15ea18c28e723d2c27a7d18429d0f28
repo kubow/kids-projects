@@ -1,0 +1,41 @@
+games/luanti/README.md
+  s_e658e293ba7557::t_174cdac95f9d19 5
+  s_e658e293ba7557::t_0c6e0e4813bc0c 19-23
+  s_e658e293ba7557::t_b33010f21eeea1 29-31,33,41,49,51-52,62-63,69,91,95-96
+  s_e658e293ba7557::t_1ec5939a16d460 3,7,9,11-17,25,27,32,35-36,38,40,42-47,55,66-67,71-72,74,76-78,82,84-86,88,90,93
+  s_e658e293ba7557::t_2fb71a2c319549 10
+games/luanti/builds/world.py
+  s_e658e293ba7557::t_0f32fea7e5596b 1-35
+games/luanti/builds/definitions.py
+  s_e658e293ba7557::t_483c37f77241e3 1-196
+games/luanti/builds/__init__.py
+  s_e658e293ba7557::t_03485d1ea526ed 1-7
+games/luanti/app.py
+  s_e658e293ba7557::t_6bf29bdb2092f7 1-471
+games/luanti/builds/blocks.py
+  s_e658e293ba7557::t_aaa8eeaed8491d 1-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "6b21ae7be15ea18c28e723d2c27a7d18429d0f28",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    },
+    "h_48e40f5ab776de": {
+      "author": "kubow"
+    }
+  },
+  "sessions": {
+    "s_e658e293ba7557": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "3370631d-b4df-4b82-9fdb-c777d137ae7e",
+        "model": "default"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}

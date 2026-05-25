@@ -1,179 +1,96 @@
 # Luanti
 
-This folder collects research on **Luanti** (formerly **Minetest**) on Linux and Raspberry Pi: install paths, content (games/mods), servers, and modding with Lua.
+Open-source voxel **platforma pro tvorbu her** (dříve Minetest): komunitní **hry** a **mody** přes [ContentDB](https://content.luanti.org/), modding v **Lua**, silné na **Linuxu** a **Raspberry Pi**. Bez komerčního účtu. Web: [luanti.org](https://www.luanti.org/).
 
-Luanti is an open-source voxel **game-creation platform** — one engine, many community **games** and **mods** from [ContentDB](https://content.luanti.org/). No Microsoft or Roblox account required.
+## Miney (Python API)
 
-Official site: [luanti.org](https://www.luanti.org/)
+Externí ovládání jako [Minecraft Pi + `mcpi`](../minecraft/README.md) — ne vestavěné Lua-only API ([api.luanti.org](https://api.luanti.org/)).
 
-## Luanti platforms overview
-
-| Platform | Official support | Best for | Main capabilities | Main limitations |
-| --- | --- | --- | --- | --- |
-| **Linux (distro package)** | Yes | Easiest install on Debian/Ubuntu/Pi OS | `apt install luanti` (or `minetest`), menu launcher, ContentDB in client | Package version may lag upstream |
-| **Linux (Flatpak)** | Yes | Sandboxed install, multiple arches | Flathub build when available for your arch | Check Flathub for `x86_64` / `aarch64` |
-| **Linux (compile from source)** | Yes | Newest engine or Pi when packages are old | Full control, server-only builds possible | Build deps and compile time |
-| **Raspberry Pi OS (arm64)** | Yes | Open voxel sandbox on Pi hardware | Often lighter than Minecraft Java; LAN server on Pi | Lower FPS; pick lightweight games/mods |
-| **Windows / macOS** | Yes | Same engine as Linux | Official downloads | Separate from Pi/Linux notes here |
-| **Android** | Yes | Mobile play | Official app | Not the same as desktop server worlds |
-| **Dedicated server** | Yes | Family LAN or headless host | `luanti --server`, Docker (arm64 tags) | Client and server versions should match; open UDP 30000 |
-
-Legacy paths: user data is often still under `~/.minetest` or `$MINETEST_USER_PATH`; system installs may use `/usr/share/minetest`.
-
-## Linux: install and play
-
-### Distribution package (recommended first try)
+- **Co:** [Miney](https://miney.readthedocs.io/) — Python klient + [mod z ContentDB](https://content.luanti.org/packages/Miney/miney/) na serveru světa
+- **Vyžaduje:** Luanti **5.7+**, Python **3.6+**, zapnutý mod **`miney`**, svět **hostovaný** (i solo hra na vlastním PC)
+- **Lokální svět:** otevři svět na tomto stroji → zapni mod → **Host game** → app se připojí na `127.0.0.1`, port **30000** (ne samostatný vzdálený server)
+- **Limity:** API **beta**; názvy uzlů jsou řetězce (`default:stone`), ne Pi numerická ID; stavby v repu předpokládají uzly `default:*`
+- **Nastavení:**
+  - ContentDB → nainstaluj **Miney** → zapni ve světě
+  - `pip install miney` (nebo `pip install -r requirements.txt` z kořene repa)
+  - Hostuj svět; ověř: `python examples/check_setup.py` z [miney-py/miney](https://github.com/miney-py/miney)
+- **Streamlit app:** [app.py](./app.py) — bloky, předpřipravené stavby, teleport, chat
 
 ```bash
-sudo apt update
-sudo apt install luanti
-# package name may still be minetest on some distros:
-# sudo apt install minetest
+source venv/bin/activate
+pip install -r requirements.txt
+streamlit run games/luanti/app.py
 ```
 
-Launch **Luanti** from the application menu, open **ContentDB**, and install games (e.g. MineClone-style packs) and mods.
+Výchozí přihlášení v sidebaru: hráč `miney`, heslo `ChangeThePassword!` (srovnej se serverem).
 
-### Flatpak
+- **vs Minecraft Pi v tomto repu:**
 
-1. Install [Flatpak](https://flatpak.org/setup/).
-2. Search [Flathub](https://flathub.org/) for Luanti / Minetest for your architecture.
-3. Install and run from the app menu; use ContentDB inside the client.
+| | Minecraft Pi | Luanti + Miney |
+| --- | --- | --- |
+| Python | `mcpi`, `minecraftstuff` | `miney` |
+| Most | Pi Edition / RaspberryJuice | mod `miney` |
+| UI | [../minecraft/app.py](../minecraft/app.py) | [./app.py](./app.py) |
 
-### Compile from source
+- **Jiná Python cesta:** [Raspberry Jam Mod](https://github.com/arpruss/raspberryjammod-minetest) (legacy **mcpi** shim; neudržovaný)
+- **Odkazy:** [docs](https://miney.readthedocs.io/) · [GitHub](https://github.com/miney-py/miney) · [ContentDB mod](https://content.luanti.org/packages/Miney/miney/)
 
-Use when packages are too old or you need a server-only build. Full guide: [Compiling on GNU/Linux](https://github.com/luanti-org/luanti/blob/master/doc/compiling/linux.md).
+## Instalace a platformy
 
-Debian/Ubuntu dependencies (summary):
+| Platforma | Nejlepší pro | Omezení |
+| --- | --- | --- |
+| **Linux apt** | Rychlý desktop / Pi OS | Balíček může zaostávat (`luanti` nebo `minetest`) |
+| **Linux Flatpak** | Sandboxed instalace | Zkontroluj arch na Flathub |
+| **Linux kompilace** | Nejnovější engine / jen server | [Compile guide](https://github.com/luanti-org/luanti/blob/master/doc/compiling/linux.md) |
+| **Raspberry Pi OS** | Klient + LAN server | Nižší FPS; lehké game packy |
+| **Dedikovaný server** | Headless / Docker | UDP **30000**; shodná verze klienta |
+| **Android** | Mobilní hraní | Pro Miney workflow zde nepoužíváno |
+
+**Linux apt**
+
+```bash
+sudo apt update && sudo apt install luanti
+```
+
+**Linux kompilace (shrnutí)**
 
 ```bash
 sudo apt install g++ make libc6-dev cmake libpng-dev libjpeg-dev libgl1-mesa-dev \
   libsqlite3-dev libogg-dev libvorbis-dev libopenal-dev libcurl4-gnutls-dev \
   libfreetype6-dev zlib1g-dev libgmp-dev libjsoncpp-dev libzstd-dev \
   libluajit-5.1-dev gettext libsdl2-dev git
-
-git clone --depth 1 https://github.com/luanti-org/luanti.git
-cd luanti
-cmake . -DRUN_IN_PLACE=TRUE
-make -j$(nproc)
-./bin/luanti
+git clone --depth 1 https://github.com/luanti-org/luanti.git && cd luanti
+cmake . -DRUN_IN_PLACE=TRUE && make -j$(nproc)
 ```
 
-CMake notes:
+- CMake: `-DRUN_IN_PLACE=FALSE` (system install); `-DBUILD_CLIENT=FALSE -DBUILD_SERVER=TRUE` (jen server)
+- Datové cesty: `~/.minetest` nebo `$MINETEST_USER_PATH`; system share často `/usr/share/minetest`
 
-- `-DRUN_IN_PLACE=FALSE` — system-wide install
-- `-DBUILD_CLIENT=FALSE -DBUILD_SERVER=TRUE` — server only
+**Raspberry Pi**
 
-## Raspberry Pi
+- Klient: **64-bit Pi OS**, `apt install luanti`, sniž view distance, vyber malé ContentDB packy
+- Server: stejný port **30000**; Docker arm64: [linuxserver/docker-luanti](https://github.com/linuxserver/docker-luanti) — image může potřebovat hru zkopírovanou do `/config/.minetest/games/`
 
-Luanti is one of the more realistic **3D sandbox** options on Pi compared with Minecraft Java or Roblox on Pi OS.
+## Obsah a modding
 
-### Client on Raspberry Pi OS
-
-1. Prefer **Raspberry Pi OS 64-bit**.
-2. `sudo apt install luanti` (or `minetest`).
-3. In settings, reduce view distance, disable heavy effects if FPS is low.
-4. Install **lightweight** games/mods from ContentDB — avoid huge mod packs on Pi 3/4.
-
-### Server on Pi or PC
-
-- Default game port: **UDP 30000**.
-- Run a world on a Pi or home PC; connect clients on the same LAN.
-- Match **Luanti version** on server and clients.
-
-Docker (arm64 supported — [linuxserver/docker-luanti](https://github.com/linuxserver/docker-luanti)):
-
-```bash
-docker run -d \
-  --name=luanti \
-  -e PUID=1000 -e PGID=1000 \
-  -p 30000:30000/udp \
-  -v /path/to/luanti-data:/config/.minetest \
-  lscr.io/linuxserver/luanti:latest
-```
-
-The image may not include a default game; add one via ContentDB or copy into `/config/.minetest/games/`.
-
-## Games, mods, and ContentDB
-
-### ContentDB (in-client)
-
-Capabilities:
-
-- browse and install **games**, **mods**, and texture packs from inside Luanti
-- thousands of community packages; no single official “Luanti game” required
-
-Limitations:
-
-- quality and kid-friendliness vary — parents should pick packs deliberately
-- online ContentDB needs network access
-
-### Lua modding
-
-Capabilities:
-
-- mods and subgames use **Lua** and the engine API
-- good progression from playing → tweaking → writing small mods
-- can publish to ContentDB when ready
-
-Limitations:
-
-- not the same language as Minecraft Java mods or Roblox Luau
-- documentation is spread across wiki and mod examples
-
-### MineClone-style games
-
-Capabilities:
-
-- community games (e.g. MineClone2) give a Minecraft-**inspired** survival/creative feel without buying Minecraft
-
-Limitations:
-
-- not official Minecraft; mechanics and updates differ
-- heavier packs may be too much for older Pi models
+- **ContentDB:** instalace her, modů, textur v klientovi; kvalita se liší — packy vybírat vědomě; potřeba sítě
+- **Lua:** oficiální mod API; hrát → upravovat → publikovat mody; docs na [wiki](https://wiki.luanti.org/Getting_Started) a příklady modů
+- **MineClone-style hry:** pocit jako Minecraft bez nákupu; náročnější na starém Pi
 
 ## Multiplayer
 
-| Approach | Notes |
+| Režim | Poznámky |
 | --- | --- |
-| **Public servers** | Server list in client — review rules and chat with kids |
-| **LAN / home server** | Host on Pi or PC; clients join by address |
-| **Internet-hosted** | Port-forward UDP 30000 only if you understand the security trade-offs |
+| Veřejné servery | Pravidla s dětmi projít |
+| LAN / doma | Host na PC nebo Pi; stejná verze Luanti |
+| Internet | Port-forward UDP 30000 jen pokud chápeš riziko |
 
-## Practical recommendation for this repo
+## Související v tomto repu
 
-| Goal | Recommendation |
-| --- | --- |
-| **Open voxel sandbox on Linux or Pi** | Distro `luanti` package first; ContentDB for a game pack |
-| **Teach programming / modding** | Small Lua mods; later subgames on ContentDB |
-| **Private family world** | Luanti server on LAN (Pi or PC) + clients on same version |
-| **Python block API like this repo’s Minecraft app** | Use [../minecraft/README.md](../minecraft/README.md) — different stack |
-| **Roblox-scale UGC catalog** | Use [../roblox/README.md](../roblox/README.md) |
+- [../README.md](../README.md) — index všech her
+- [../minecraft/README.md](../minecraft/README.md) · [../roblox/README.md](../roblox/README.md) · [../terasology/README.md](../terasology/README.md)
 
-## Related sandbox / UGC options
+## Odkazy
 
-Platforms in this repo (see [../README.md](../README.md)):
-
-- [Minecraft](../minecraft/README.md) — commercial sandbox; Pi Python API in this repo
-- [Terasology](../terasology/README.md) — open Java modules; desktop x86_64
-- [Roblox](../roblox/README.md) — commercial UGC platform
-
-Luanti-adjacent links:
-
-- [Freeminer](https://freeminer.org/) — fork in the Minetest / Luanti family tree
-- [Minetest Game](https://github.com/minetest/minetest_game) — historical default game
-- [Veloren](https://veloren.net/) — open multiplayer voxel RPG (different genre)
-
-## Key links
-
-### Official / upstream
-
-- [Luanti](https://www.luanti.org/)
-- [Downloads](https://www.luanti.org/downloads/)
-- [GitHub — luanti-org/luanti](https://github.com/luanti-org/luanti)
-- [ContentDB](https://content.luanti.org/)
-
-### Docs and community
-
-- [Compiling on Linux](https://github.com/luanti-org/luanti/blob/master/doc/compiling/linux.md)
-- [Getting started (wiki)](https://wiki.luanti.org/Getting_Started)
-- [linuxserver/docker-luanti](https://github.com/linuxserver/docker-luanti)
+- [Luanti](https://www.luanti.org/) · [Downloads](https://www.luanti.org/downloads/) · [GitHub](https://github.com/luanti-org/luanti) · [ContentDB](https://content.luanti.org/)
+- [Freeminer](https://freeminer.org/) · [Minetest Game](https://github.com/minetest/minetest_game) · [Veloren](https://veloren.net/)

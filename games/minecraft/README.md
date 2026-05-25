@@ -1,23 +1,42 @@
 # Minecraft
 
-This folder collects the Minecraft notes and the Streamlit tooling used in this repo.
+Poznámky a nástroje pro **Minecraft** na Linuxu a Raspberry Pi v tomto repu. Komerční hra (Microsoft); tři hlavní edice se liší platformou a tím, co lze skriptovat.
 
-## Streamlit app for Minecraft Pi / RaspberryJuice
+## Edice (vyber jeden stack)
 
-The app in [app.py](/home/jav/Documents/kids-projects/games/minecraft/app.py) is a small web UI for the **Minecraft Pi Edition API**. It can connect either to:
+| Edice | Platformy | Nejlepší pro | Toto repo |
+| --- | --- | --- | --- |
+| **Pi Edition** | Raspberry Pi (legacy) | Python block API, Pi ve třídě | [Streamlit app](./app.py) + `mcpi` |
+| **Java** | Windows, macOS, Linux | Plná hra, mody, servery, redstone | Jen poznámky k hraní/instalaci — ne Pi API app |
+| **Bedrock** | Windows, konzole, mobily, tablety | Cross-play, Marketplace, ovladače | Zde nepokrýváno |
 
-- **Minecraft Pi Edition**
-- **RaspberryJuice**, the compatibility plugin that exposes a similar API from a Java server
+### Pi Edition (+ cíle API pro app)
 
-Main features:
+- Malý starý sandbox na Pi; umístění/odstranění bloků, pohyb hráče, kamera, chat přes **Python** ([`mcpi`](https://pypi.org/project/mcpi/))
+- Lehký na slabém hardware; vhodný pro malou automatizaci a úpravy světa
+- **Není** moderní Minecraft: málo bloků/mechanik, bez Realms/Marketplace/cross-play s Java nebo Bedrock
+- **Komunitní revival:** [Minecraft Pi: Reborn](https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn)
+- **Java server shim:** [RaspberryJuice](https://www.raspberrypi-juice.com/) — plugin pro Paper/Spigot s Pi-like API, stejné `mcpi` skripty míří na Java svět (experiment; ne moderní mod stack)
+- **Tutoriál:** [Getting Started with Minecraft Pi](https://projects.raspberrypi.org/en/projects/getting-started-with-minecraft-pi/0)
 
-- connect to a running Minecraft API server by host and port
-- place predefined builds such as houses, towers, walls, pyramids, spheres, pixel art, statues, and simple mobs
-- inspect and place blocks
-- move the player and use basic camera/chat controls
-- import `.schematic` files with fallback handling for unsupported blocks
+### Java Edition
 
-Run from the repo root:
+- Plná desktop hra; mody, modpacky, shadery, data packy, snapshoty, velký ekosystém serverů
+- **Linux hraní (bez `mcpi`):** oficiální launcher nebo [Prism Launcher](https://prismlauncher.org/) s minimální instancí (např. Fabric + Sodium pro výkon)
+- Bez cross-play s Bedrock; modding/instalace techničtější; výkon závisí na hardware a modpacku
+
+### Bedrock Edition
+
+- Cross-play mezi Bedrock zařízeními; Marketplace; silné na konzolích, mobilech, split-screen
+- Méně komunitního moddingu než Java; vázané na Microsoft účet/služby; oddělené od Java světů a serverů
+
+## Streamlit app (jen Pi API)
+
+[app.py](./app.py) — webové UI pro **Minecraft Pi Edition API** (`mcpi`, volitelně [`minecraftstuff`](https://pypi.org/project/minecraftstuff/)).
+
+- **Připojení k:** Pi Edition **nebo** RaspberryJuice na Java serveru (host + port, výchozí **4711**)
+- **Funkce:** umístění bloků (vč. spread), předpřipravené stavby, entity, teleport hráče, import `.schematic` s fallbackem pro nepodporované bloky
+- **Není** launcher pro Java/Bedrock; nástroj pro výuku/skriptování na starém API
 
 ```bash
 source venv/bin/activate
@@ -25,99 +44,19 @@ pip install -r requirements.txt
 streamlit run games/minecraft/app.py
 ```
 
-Python packages used:
+## Co použít v tomto repu
 
-- `[mcpi](https://pypi.org/project/mcpi/)`
-- `[minecraftstuff](https://pypi.org/project/minecraftstuff/)`
+- **Programovat bloky z Pythonu** → Pi Edition nebo RaspberryJuice + tato app
+- **Hrát moderní Minecraft na Linuxu** → Java Edition přímo (bez `mcpi`, Paper nebo RaspberryJuice)
 
-Important note:
+## Související v tomto repu
 
-- This app is tied to the **old Minecraft Pi style API**.
-- It is best treated as a **teaching and scripting tool**, not as a modern general Minecraft launcher.
-- `RaspberryJuice` is an old compatibility plugin, so it is useful for experiments but not a clean modern foundation for up-to-date Java Minecraft.
+- [../README.md](../README.md) — index
+- [../luanti/README.md](../luanti/README.md) — open voxel + [Miney](../luanti/README.md) (Python, jako `mcpi`)
+- [../roblox/README.md](../roblox/README.md) · [../terasology/README.md](../terasology/README.md)
 
-## Minecraft versions overview
+## Odkazy
 
-
-| Version | Best for | Main capabilities | Main limitations |
-| --- | --- | --- | --- |
-| **Minecraft Pi Edition** | Learning programming basics on Raspberry Pi | Simple block world, local building, Python/API control, easy automation, lightweight | Very old version, no modern updates, very limited blocks/features, no full Survival experience, not compatible with modern Minecraft multiplayer |
-| **Minecraft Java Edition** | Maximum flexibility, mods, private servers, technical play | Full PC version, huge modding scene, custom servers, snapshots, commands, redstone/community tooling | PC only, no cross-play with Bedrock, setup can be more technical, performance depends more on the computer/modpack |
-| **Minecraft Bedrock Edition** | Easy multiplayer across devices | Cross-play on many devices, Marketplace content, good controller/touch support, smoother console/mobile experience, split-screen on consoles | Limited modding compared with Java, many servers/features depend on Microsoft account/ecosystem, less open for deep customization |
-
-
-### Minecraft Pi Edition
-
-Capabilities:
-
-- designed for Raspberry Pi and beginner programming
-- lets you place and remove blocks, move the player, read positions, change the camera, and post chat messages through the API
-- good for small coding projects, automation, and simple world editing
-- lightweight and easy to run on low-power hardware
-
-Limitations:
-
-- very old and heavily cut down compared with modern Minecraft
-- mostly focused on classic-style building, not the full modern game
-- far fewer blocks, mechanics, mobs, biomes, and gameplay systems
-- no modern cross-play, Marketplace, Realms, or current survival features
-
-### Minecraft Java Edition
-
-Capabilities:
-
-- desktop version for Windows, macOS, and Linux
-- supports mods, modpacks, shaders, custom maps, data packs, and large third-party servers
-- strong for redstone, technical builds, commands, automation, and community tooling
-- supports snapshots for testing upcoming features
-
-Limitations:
-
-- desktop only
-- no direct cross-play with Bedrock
-- modding and server setup can be more technical
-- performance depends more on hardware, Java setup, and mod selection
-
-### Minecraft Bedrock Edition
-
-Capabilities:
-
-- available on Windows, consoles, phones, and tablets
-- supports cross-play across Bedrock devices
-- easier for families and mixed-device multiplayer
-- includes official services such as Marketplace content
-
-Limitations:
-
-- less open to community modding than Java
-- more locked to the official Microsoft ecosystem
-- still separate from Java Edition
-
-## Practical recommendation for this repo
-
-There are two distinct use cases here:
-
-- If the goal is **programming blocks from Python**, this folder's Streamlit app plus **Minecraft Pi Edition** or **RaspberryJuice** is the right fit.
-- If the goal is **playing a decluttered modern Minecraft on Linux**, prefer **Minecraft Java Edition** directly, without `mcpi`, Paper, or RaspberryJuice.
-
-For a lightweight Linux setup, the cleanest modern path is usually:
-
-- official Minecraft Java launcher, or
-- Prism Launcher with a minimal Java instance, optionally using Fabric plus Sodium for performance
-
-## Related sandbox / UGC options
-
-Open-source voxel platforms in this repo (see [../README.md](../README.md) for a full comparison):
-
-- [Luanti](../luanti/README.md) — open engine + ContentDB mods; strong on Linux and Pi
-- [Terasology](../terasology/README.md) — Java modules; desktop Linux
-- [Roblox](../roblox/README.md) — commercial UGC platform
-
-Other Minecraft-adjacent links:
-
-- [Minecraft Pi: Reborn](https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn)
-- [Getting Started with Minecraft Pi](https://projects.raspberrypi.org/en/projects/getting-started-with-minecraft-pi/0)
-- [StanislavPetrovV/Minecraft](https://github.com/StanislavPetrovV/Minecraft) — Python and OpenGL voxel engine
-- [fogleman/Craft](https://github.com/fogleman/Craft) — simple Minecraft-like clone in C and OpenGL
-- [Freeminer](https://freeminer.org/)
-
+- [minecraft.net](https://www.minecraft.net/)
+- [mcpi](https://pypi.org/project/mcpi/) · [minecraftstuff](https://pypi.org/project/minecraftstuff/)
+- [StanislavPetrovV/Minecraft](https://github.com/StanislavPetrovV/Minecraft) · [fogleman/Craft](https://github.com/fogleman/Craft) — malé vzdělávací klony

@@ -1,127 +1,60 @@
 # Terasology
 
-This folder collects research on **Terasology** on Linux and Raspberry Pi: launcher install, modules, limits on ARM/Pi, and how it compares to other open voxel options in this repo.
+Open-source 3D voxel hra od [MovingBlocks](https://github.com/MovingBlocks): gameplay z **modulů** (Java, Gradle), instalace přes **Terasology Launcher**. Web: [terasology.org](https://terasology.org/).
 
-**Terasology** is an open-source 3D voxel game from [MovingBlocks](https://github.com/MovingBlocks). Gameplay is built from **modules** (Java, Gradle), installed and updated through the **Terasology Launcher**.
+## Platformy (vyber jeden stack)
 
-Site: [terasology.org](https://terasology.org/)
+| Stack | Platformy | Nejlepší pro | Limity |
+| --- | --- | --- | --- |
+| **Launcher** | Linux / Windows / macOS **x86_64** | Hraní + modulové packy | OpenGL **3.3** GPU; ~2–4 GB RAM; první běh potřebuje internet |
+| **Engine release** | Desktop + **JDK 17+** | Vývoj / ruční instalace | Více práce než launcher |
+| **Pi klient** | Raspberry Pi OS arm64 | — | Klient **nepodporován** ([ARM #3412](https://github.com/MovingBlocks/Terasology/issues/3412)) |
+| **Pi headless server** | Pi (pokročilé) | CLI server experimenty | Ne dětská cesta k hraní |
+| **Multiplayer** | LAN / hostované | Světy podle modulů | Shodný set modulů + verze engine na hostu a klientech |
 
-## Terasology platforms overview
+**Požadavky ([downloads](https://terasology.org/downloads/)):** 64-bit OS, dual-core CPU, 2–4 GB RAM, OpenGL 3.3, ~1 GB disk.
 
-| Platform | Official support | Best for | Main capabilities | Main limitations |
-| --- | --- | --- | --- | --- |
-| **Linux x86_64 (launcher)** | Yes | Desktop play and module experiments | Download launcher, pick module packs, offline play after fetch | 64-bit only; needs OpenGL 3.3 GPU |
-| **Windows / macOS (launcher)** | Yes | Same as Linux desktop | Official launcher archives | Not covered in depth here |
-| **Linux (direct engine release)** | Yes | Developers with JDK 17+ already set up | Skip launcher workflow if you manage Java yourself | More manual than launcher |
-| **Raspberry Pi OS (arm64) client** | No | — | — | LWJGL / native libs not built for ARM client ([issue #3412](https://github.com/MovingBlocks/Terasology/issues/3412)) |
-| **Raspberry Pi (headless server)** | Partial | Advanced/server-only experiments | Some reports of server starting on Pi | No polished Pi gaming path; CLI-only |
-| **Dedicated / multiplayer** | Yes | Module-dependent LAN or hosted worlds | Multiplayer via selected modules | Match module set and versions between host and clients |
+## Linux: instalace a hraní
 
-Minimum requirements ([downloads](https://terasology.org/downloads/)): 64-bit OS, dual-core CPU, 2–4 GB RAM, GPU with **OpenGL 3.3**, ~1 GB disk; internet for first launcher download.
+**Launcher (doporučeno)**
 
-## Linux: install and play
+- [terasology.org/downloads](https://terasology.org/downloads/) → **Linux (64-bit)** → rozbal → `./bin/TerasologyLauncher`
+- Stáhni engine + vyber **moduly** v UI; offline hra po cache
+- Projekt: [TerasologyLauncher](https://github.com/MovingBlocks/TerasologyLauncher)
 
-### Terasology Launcher (recommended)
+**Engine přímo (vývojáři)**
 
-1. Open [terasology.org/downloads](https://terasology.org/downloads/).
-2. Select **Linux (64-bit)** and download the launcher archive.
-3. Extract the archive.
-4. Run:
+- [Engine README](https://github.com/MovingBlocks/Terasology/blob/develop/README.md) — **Java 17+**
+- Nástroje: JDK, Git, Gradle (`gradlew` v repozitářích launcher/engine)
 
-```bash
-./bin/TerasologyLauncher
-```
+## Moduly
 
-5. In the launcher, download the engine and choose **modules** / gameplay packs.
-6. Play offline after assets are cached.
-
-Launcher project: [MovingBlocks/TerasologyLauncher](https://github.com/MovingBlocks/TerasologyLauncher)
-
-### Direct engine release (alternative)
-
-For development or manual installs, see the engine README — **Java 17** required: [MovingBlocks/Terasology](https://github.com/MovingBlocks/Terasology/blob/develop/README.md).
-
-Development tooling: JDK, Git, Gradle wrapper (`gradlew` tasks in launcher/engine repos).
+- **Hraní:** modulové packy (generování světa, bloky, tvorové) přes launcher; offline po stažení; menší ekosystém než [Luanti ContentDB](../luanti/README.md) nebo komerční UGC
+- **Vývoj:** Java moduly + Gradle — vhodné pro učení engine/architektury; náročnější než Luanti **Lua** pro malé začátečníky
+- **Multiplayer:** chování podle zapnutých modulů; verze zdokumentovat pro LAN/kamarády; veřejný port jen pokud chápeš rizika
 
 ## Raspberry Pi
 
-### What does not work on Pi OS
+- **Klient na Pi OS:** nepraktický — LWJGL/nativy historicky x86, ne ARM ([#3412](https://github.com/MovingBlocks/Terasology/issues/3412)); pro Pi sandbox/hraní [../luanti/README.md](../luanti/README.md) nebo [../minecraft/README.md](../minecraft/README.md) (Pi API)
+- **Headless server:** může startovat jen pro experimenty (CLI, shoda verze/modulů)
+- Skutečný desktop klient na Pi by potřeboval upstream ARM64 native buildy (LWJGL + fyzika)
 
-- **Full game client** on Raspberry Pi OS arm64 is **not supported** in practice — native libraries have historically targeted x86, not ARM ([Crash on ARM platform #3412](https://github.com/MovingBlocks/Terasology/issues/3412)).
-- Do not expect a smooth “install launcher and play” path on Pi like Luanti or Minecraft Pi API.
+## Co použít v tomto repu
 
-### What might work (limited)
-
-- **Headless server** — may start on a Pi for CLI-only hosting; module and version matching still apply; not a kid-friendly default.
-- **Practical Pi sandbox** — use [../luanti/README.md](../luanti/README.md) or [../minecraft/README.md](../minecraft/README.md) instead.
-
-Upstream would need ARM64 builds of LWJGL and physics natives for a real Pi desktop client.
-
-## Modules and gameplay packs
-
-### Module packs (via launcher)
-
-Capabilities:
-
-- gameplay composed from **modules** (world generation, blocks, creatures, etc.)
-- install and update through launcher UI
-- offline play after download
-
-Limitations:
-
-- smaller ecosystem than Luanti ContentDB or commercial UGC platforms
-- module combinations can be confusing for beginners
-
-### Java module development
-
-Capabilities:
-
-- extend the engine with **Java** modules and Gradle builds
-- good for learners curious about **game engine architecture**
-
-Limitations:
-
-- heavier than Luanti **Lua** mods — JDK, Git, Gradle required
-- not a quick “first coding project” path for young kids
-
-## Multiplayer
-
-- Depends on **which modules** are enabled on the host world.
-- Document module list and engine version when hosting for friends or family.
-- Prefer LAN unless you understand port exposure and server administration.
-
-## Practical recommendation for this repo
-
-| Goal | Recommendation |
+| Cíl | Použít |
 | --- | --- |
-| **Open voxel on Raspberry Pi** | [../luanti/README.md](../luanti/README.md) |
-| **Open voxel on Linux desktop (simple)** | [../luanti/README.md](../luanti/README.md) first |
-| **Java modules / engine curiosity on PC** | Terasology Launcher on **x86_64 Linux** |
-| **Python block coding on Pi** | [../minecraft/README.md](../minecraft/README.md) |
-| **Large online UGC catalog** | [../roblox/README.md](../roblox/README.md) or Minecraft |
+| Open voxel na **Pi** | [../luanti/README.md](../luanti/README.md) |
+| Open voxel na **Linuxu** (jednoduše) | Luanti jako první |
+| **Java** moduly / engine na PC | Terasology Launcher (x86_64) |
+| **Python** bloky na Pi | [../minecraft/README.md](../minecraft/README.md) |
+| Velký online UGC katalog | [../roblox/README.md](../roblox/README.md) nebo Minecraft |
 
-## Related sandbox / UGC options
+## Související v tomto repu
 
-Platforms in this repo (see [../README.md](../README.md)):
+- [../README.md](../README.md) — index
+- [../luanti/README.md](../luanti/README.md) · [../minecraft/README.md](../minecraft/README.md) · [../roblox/README.md](../roblox/README.md) · [../retro/README.md](../retro/README.md)
 
-- [Luanti](../luanti/README.md) — open Lua mods; strong Linux and Pi support
-- [Minecraft](../minecraft/README.md) — commercial sandbox; Pi Python API
-- [Roblox](../roblox/README.md) — commercial UGC platform
+## Odkazy
 
-Terasology-adjacent links:
-
-- [Veloren](https://veloren.net/) — open multiplayer voxel RPG
-- [Freeminer](https://freeminer.org/) — Minetest / Luanti family fork
-
-## Key links
-
-### Official / upstream
-
-- [Terasology](https://terasology.org/)
-- [Downloads / launcher](https://terasology.org/downloads/)
-- [GitHub — MovingBlocks/Terasology](https://github.com/MovingBlocks/Terasology)
-- [Terasology Launcher](https://github.com/MovingBlocks/TerasologyLauncher)
-
-### Raspberry Pi / ARM
-
-- [ARM / Raspberry Pi discussion (#3412)](https://github.com/MovingBlocks/Terasology/issues/3412)
+- [Terasology](https://terasology.org/) · [Downloads](https://terasology.org/downloads/) · [Engine](https://github.com/MovingBlocks/Terasology) · [Launcher](https://github.com/MovingBlocks/TerasologyLauncher)
+- [Veloren](https://veloren.net/) · [Freeminer](https://freeminer.org/)

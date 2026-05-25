@@ -1,0 +1,44 @@
+---
+description: Dokumentace složky brick — index README, jeden soubor na edici, bez opakování, text v češtině
+globs: brick/**/*.md
+alwaysApply: false
+---
+
+# Styl dokumentace stavebnic (`brick/`)
+
+Při psaní nebo úpravě `brick/**/*.md`:
+
+## Jazyk
+
+- Veškerý **text pro čtení** piš **česky** (nadpisy sekcí, popisy, poznámky).
+- Angličtina jen tam, kde je nutná: názvy značek (LEGO, Brio), čísla setů, cesty, technické identifikátory, názvy externích služeb (Rebrickable, BrickLink).
+
+## README (`brick/README.md`)
+
+- **Krátký přehled** — co složka sleduje (fyzické stavebnice doma).
+- **Index** — jedna odrážka na značku nebo LEGO edici s krátkým popisem (téma, věk) a odkazem na detailní soubor.
+- V README **ne** vypisovat jednotlivé sety, návody, nákupní URL ani galerie fotek.
+- Volitelně v indexu jen odkazy na `Lego_Education.md` (wishlist), `parts.md` (volné díly), `manuals/` — ne celé seznamy URL v README.
+
+## Detailní soubory (jedna edice nebo značka)
+
+- Soubor na **LEGO téma/edici** (např. `Lego_City.md`, `Lego_Technic.md`) nebo ne-LEGO značku (`brio.md`, `Seva.md`).
+- **Veškerý** detail setu sem: čísla, názvy staveb, odkazy na návody, Rebrickable/BrickLink, `![foto](./images/<soubor>)` pokud existuje `images/`.
+- **Názvy souborů fotek** odpovídají číslu LEGO setu (`6541.jpg`, ne `8541.jpg`). Tabulku inventáře fotek udržovat v `brick/README.md` pod `## Obrázky`.
+- **Lokální PDF** v `manuals/` uvést v souboru edice a jednou v tabulce `## Návody` v README.
+- Začít jednou větou, co edice/téma je; pak `## Sety` s `###` na model.
+- Popis edice neopakovat v horním README.
+
+## Jedno téma, jedno místo
+
+- Stejně jako u her: každý set zmíněn jednou; odkazy ne duplikovat mezi README a souborem edice.
+- Preferovat **odrážky** pod každým setem; tabulku jen pro srovnání edic v indexu.
+
+## Pojmenování
+
+- LEGO soubory: `Lego_<Edice>.md` (City, Creator, Technic, System, …).
+- Názvy souborů v ASCII; text dokumentace v češtině.
+
+## Ne-LEGO
+
+- Brio, Seva atd. stejný vzor jako LEGO edice — nemíchat do `Lego_*.md`.

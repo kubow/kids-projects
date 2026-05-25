@@ -1,0 +1,44 @@
+---
+description: Dokumentace složky games — jedno zmínění na téma, odrážky, bez opakování, text v češtině
+globs: games/**/*.md
+alwaysApply: false
+---
+
+# Styl dokumentace her (`games/`)
+
+Při psaní nebo úpravě `games/**/*.md`:
+
+## Jazyk
+
+- Veškerý **text pro čtení** piš **česky** (nadpisy sekcí, popisy, poznámky).
+- Angličtina jen tam, kde je nutná: názvy nástrojů, příkazy, cesty, identifikátory v kódu, oficiální názvy produktů (Minecraft, Roblox, …).
+
+## Jedno téma, jedno místo
+
+- Každý **koncept, nástroj nebo odkaz** zmínit jednou v souboru, kam patří.
+- **Veškerý** detail k tématu dát tam (instalace, limity, příkazy, odkazy) — stejnou informaci ne roztříštit do úvodu, tabulek, „praktického“ a „klíčových odkazů“.
+- Jiné sekce mohou **odkázat** jinam (`viz [Miney](#miney)`), ne znovu popisovat.
+
+## Preferovat odrážky před opakovanou prozou
+
+- **Odrážky** pro kroky, požadavky, možnosti a omezení.
+- **Tabulku** jen při srovnání možností vedle sebe (platformy, cíle).
+- Vyhnout se duplicitním podsekci typu Možnosti / Omezení pro stejné téma.
+
+## Struktura
+
+- **README** (`games/README.md`): krátký index — jedna odrážka na složku hry, bez návodů k instalaci.
+- **README hry**: detail jen pro danou hru; odkazy na sourozenecké složky, ne kopie jejich obsahu.
+- **Odkazy**: jedna sekce `## Odkazy` (nebo na konci příslušné podsekce), ne stejná URL ve třech místech.
+
+## Neopakovat
+
+- Výchozí porty, hesla, `pip install`, „zapni mod miney“ → jednou v sekci daného nástroje.
+- „Viz ../README.md pro srovnání“ → nejvýše jednou v souboru.
+- Sourozenecké hry (Minecraft, Roblox, …) → jednou pod **Související v tomto repu**, ne v úvodu + prakticky + související.
+
+## Příklad (špatně → dobře)
+
+Špatně: Miney v úvodu, znovu v instalaci, znovu u Streamlit, znovu pod Klíčové odkazy se stejnou URL ContentDB.
+
+Dobře: jedna sekce `## Miney` s odrážkami pro mod + pip, požadavek hostovaného serveru, lokální `127.0.0.1`, příkaz Streamlit, tabulka vs `mcpi`, pak odkazy.

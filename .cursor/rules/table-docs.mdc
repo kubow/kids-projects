@@ -1,0 +1,38 @@
+---
+description: Dokumentace složky table — index README, jeden soubor na hru, přehled + pravidla + odkazy
+globs: table/**/*.md
+alwaysApply: false
+---
+
+# Styl dokumentace společenských her (`table/`)
+
+Při psaní nebo úpravě `table/**/*.md`:
+
+## Jazyk
+
+- Veškerý **text pro čtení** piš **česky** (nadpisy sekcí, popisy, pravidla, poznámky).
+- Angličtina jen tam, kde je nutná: oficiální název hry v originále, cesty, technické identifikátory.
+
+## README (`table/README.md`)
+
+- **Krátký přehled** — deskové a karetní hry doma.
+- **Index** — jeden odrážkový řádek na hru (žánr, hráči, věk) s odkazem na detailní soubor.
+- Sekce **Deskové hry** a **Karetní hry**; v README neuvádět pravidla ani externí URL.
+- Nepřepisovat text přehledu z detailních souborů.
+
+## Detailní soubory (jeden na hru)
+
+Pořadí sekcí:
+
+1. **`#` název** — jméno hry.
+2. **Přehled** — 2–4 odrážky přímo pod `#` (bez nadpisu `## Přehled`).
+3. **`## Pravidla`** — stručně ke hře; odrážky pro přípravu, průběh tahu, vítězství. Ne kopírovat celý rulebook.
+4. **`## Odkazy`** — preferovat [zatrolenehry.cz](https://www.zatrolenehry.cz) (`/spolecenska-hra/<slug>/`); BGG nebo vydavatele jen když na zatrolených hrách stránka není. Jeden blok odkazů na soubor.
+
+- Varianty nebo edice v domácnosti (např. Karak 1 a 2) patří do jednoho souboru s poznámkou v přehledu — ne jako samostatné položky v README, pokud se nehrají zásadně jinak.
+- Názvy souborů ASCII (`vybusne-kotatka.md`, `osadnici-z-katanu.md`).
+
+## Jedno téma, jedno místo
+
+- Stejně jako u `games/` a `brick/`: každá hra zmíněna jednou; pravidla a odkazy neopakovat v README.
+- Preferovat **odrážky**; tabulku jen pro srovnání her v indexu.

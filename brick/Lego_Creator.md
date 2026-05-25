@@ -1,8 +1,14 @@
+# LEGO Creator
 
-# 🔩 Lego Creator
+[Téma Creator](https://www.lego.com/en-us/themes/creator) — často **3-in-1**: několik modelů z jedné krabice. Vhodné pro přestavění po hlavním modelu.
 
-[LEGO Creator set](https://rebrickable.com/sets/creator/)
+Katalog: [Rebrickable — Creator](https://rebrickable.com/sets/creator/)
 
-## 🚛 Flatbed Truck
+## Sety
 
-- [LEGO Set 31146-1 Flatbed Truck with Helicopter (2024 Creator > Creator 3-in-1) | Rebrickable - Build with LEGO](https://rebrickable.com/sets/31146-1/flatbed-truck-with-helicopter/#comments)
+### Flatbed Truck with Helicopter (31146)
+
+- 2024 Creator 3-in-1
+- [Rebrickable — 31146-1](https://rebrickable.com/sets/31146-1/flatbed-truck-with-helicopter/)
+
+![31146](./images/31146.jpg)

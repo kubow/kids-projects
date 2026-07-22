@@ -1,0 +1,20 @@
+games/minecraft/mc_java.md
+  h_0907ec034f4a17 1-22
+games/minecraft/README.md
+  h_0907ec034f4a17 3,9-13
+games/minecraft/mcpi.md
+  h_0907ec034f4a17 1-22
+games/minecraft/mc_bedrock.md
+  h_0907ec034f4a17 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "d5c2e6e08cf1735c1e410343b277756923eed2ec",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}

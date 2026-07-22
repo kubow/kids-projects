@@ -1,0 +1,64 @@
+games/minecraft/minecraftWorlds/BWpvhRloV8s=/db/CURRENT
+  s_f893c1a20214ff::t_70a408b26e327b 1
+games/minecraft/minecraftWorlds/P6v0+VmGG4o=/db/CURRENT
+  s_a787b451b6bdcf::t_a1a59eb473b694 1
+games/minecraft/minecraftWorlds/P7VV+WJyYTQ=/db/CURRENT
+  s_5d4c36a8d3b19e::t_ee1e8c84ecc80c 1
+games/minecraft/minecraftWorlds/P7VV+WJyYTQ=/levelname.txt
+  s_bbbe8e5c4b5ad1::t_2b0f7e3707e0c1 1
+games/minecraft/minecraftWorlds/P7VV+WJyYTQ=/world_behavior_packs.json
+  s_5d4c36a8d3b19e::t_b2a3480d489f00 1
+games/minecraft/minecraftWorlds/P7VV+WJyYTQ=/world_resource_packs.json
+  s_5d4c36a8d3b19e::t_240e4fdaf9bb17 1
+games/minecraft/minecraftWorlds/Pi5fnkvWS7E=/db/CURRENT
+  s_bbbe8e5c4b5ad1::t_0817d98ea3f426 1
+games/minecraft/minecraftWorlds/Pi5fnkvWS7E=/levelname.txt
+  s_bbbe8e5c4b5ad1::t_04233e1683b6e0 1
+games/minecraft/minecraftWorlds/SBk6GNpCbzU=/db/CURRENT
+  s_bbbe8e5c4b5ad1::t_88e7f759a9fef0 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "eb5bee13700d1d2da657f73401794132fdd4370c",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_5d4c36a8d3b19e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "37add169-7d27-4f29-880b-cb4f0dd84d54",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    },
+    "s_a787b451b6bdcf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d47b5b5a-7d19-4910-b2ac-a52673f09834",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    },
+    "s_bbbe8e5c4b5ad1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f8d24208-6427-49f3-aadb-4590d33e8f6a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    },
+    "s_f893c1a20214ff": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f25f86a6-4166-4401-8fd0-0aa797786646",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}

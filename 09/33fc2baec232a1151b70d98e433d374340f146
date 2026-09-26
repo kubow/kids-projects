@@ -1,0 +1,14 @@
+games/minecraft/mc_bedrock.md
+  h_0907ec034f4a17 6-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0933fc2baec232a1151b70d98e433d374340f146",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}

@@ -12,10 +12,10 @@ Licence Bedrocku **není přenositelná mezi obchody** (žádný cross-buy): hra
 | Platforma | Jak se spouští | Build hry | Potřebná licence | Stav u nás |
 | --- | --- | --- | --- | --- |
 | **Android** (mobil/tablet) | nativně z Google Play | Android | Google Play | ✅ funguje, hlavní platforma |
-| **Linux – mcpelauncher** | [mcpelauncher](https://minecraft-linux.github.io/) (flatpak `io.mrarm.mcpelauncher`) | Android | Google Play (login v launcheru) | ✅ funguje, **tohle používáme**, viz poznámky níže |
+| **Linux – mcpelauncher** | [mcpelauncher](https://minecraft-linux.github.io/) (AUR `mcpelauncher-ui` + `mcpelauncher-linux`, příp. flatpak `io.mrarm.mcpelauncher`) | Android | Google Play (login v launcheru) | ✅ funguje, **tohle používáme**, viz poznámky níže; ⚠️ **ne s Family Link účtem** |
 | **Linux – nadstavby nad mcpelauncherem** | [Trinity Launcher](https://github.com/Trinity-LA/Trinity-Launcher), Cianova, Iosel Edition (AppImage) | Android | Google Play | ⚠️ nezkoušeno, stejné jádro i omezení jako mcpelauncher |
 | **Linux – Waydroid** | Android v kontejneru | Android | Google Play | ❌ nové verze zamrznou na loading screenu |
-| **Linux – BedrockOnLinux 2.0** (07/2026) | [BedrockOnLinux](https://github.com/CryptoFewka/BedrockOnLinux): WineGDK, Xbox přihlášení, Realms, servery | Windows (GDK) | Microsoft Store / Xbox | ❌ s Google Play licencí nejde |
+| **Linux – BedrockOnLinux 2.0** (07/2026) | [BedrockOnLinux](https://github.com/CryptoFewka/BedrockOnLinux): WineGDK, Xbox přihlášení, Realms, servery | Windows (GDK) | Microsoft Store / Xbox | ❌ s Google Play licencí nejde (ověřeno 17. 10. 2026: store download hlásí *„not entitled to this content“*) |
 | **Linux – WineGDK / GDK-Proton ručně** | [mcbe-on-linux](https://github.com/inbob1/mcbe-on-linux), [Lutris + GDK-Proton](https://github.com/jphein/minecraft-bedrock-linux) | Windows (GDK) | Microsoft Store / Xbox | ❌ s Google Play licencí nejde; GDK-Proton u 1.26.x nefunguje (chybí D3D zařízení), funguje jen čistý WineGDK |
 | **Linux – Windows VM** | VirtualBox / QEMU s Windows | Windows | Microsoft Store / Xbox | ❌ stejný problém s licencí, navíc náročné |
 | **Windows** | Minecraft Launcher / Microsoft Store / PC Game Pass | Windows (GDK) | Microsoft Store / Xbox / Game Pass | ❌ s Google Play licencí nespustitelné |
@@ -59,13 +59,35 @@ Pozor:
 - Svět importovaný/uložený s add-onem má **vlastní kopii packů** v `minecraftWorlds/<id>/behavior_packs` a `resource_packs` – při opravě packu vyměnit i tu.
 - **Mr. Nido's Guns** (v1.0.0) je rozbitý pro 1.26 (miliony chyb, skiny/animace hráče) → opravená verze 1.0.1 přes [fixes/fix_nido_guns.py](./fixes/fix_nido_guns.py) (11/2026). **ACT Weapons** na tabletu nefunguje (potřebuje `@minecraft/server-admin`, to je jen na dedicated serveru).
 
+### mcpelauncher a dětský účet (Google Family Link)
+
+*Zjištěno: 17. 10. 2026*
+
+**Problém:** přihlášení Google účtem pod Family Link v mcpelauncheru se zasekne na login obrazovce (prázdná stránka, smyčka zpět na formulář nebo „tento účet zde nelze použít“).
+
+**Proč:** launcher se při stahování hry tváří jako Android telefon, který se přihlašuje do Google Play. Google dohlížené (Family Link) účty na nespravovaných zařízeních a v klientech třetích stran blokuje. Rodič to nemůže schválit ani v aplikaci Family Link, protože launcher není skutečné Android zařízení, které by Family Link uměl spravovat. Nejde o chybu launcheru.
+
+**Co nefunguje:**
+
+- Schválení nového zařízení přes Family Link (funguje jen pro skutečné Android / ChromeOS zařízení).
+- Zkopírovat hru z BedrockOnLinux (`~/.local/share/bedrock-on-linux/games/…`). To je **Windows (GDK) build** (`Microsoft.MinecraftUWP_…`), mcpelauncher potřebuje **Android build** (APK z Google Play). Formáty nejsou zaměnitelné.
+
+**Co funguje / řešení:**
+
+1. **Stáhnout hru jiným, nedohlíženým Google účtem, který Minecraft vlastní** (typicky rodičovský). Google účet launcher potřebuje jen ke stažení APK. Ve hře se pak dítě přihlásí svým **Microsoft/Xbox** účtem (Realms, přátelé, cross-play).
+   - Pokud hru koupil jen dětský účet: zkusit **Rodinnou knihovnu Google Play** (Family Library). Když ji hra podporuje (ověřit na stránce hry v Google Play), sdílí se nákup s rodičovským účtem ve stejné rodině a ten ji pak může stáhnout v launcheru.
+2. **Přenést už stažené verze** z jiného počítače s funkčním mcpelauncherem: složka `~/.local/share/mcpelauncher/versions/` (flatpak: `~/.var/app/io.mrarm.mcpelauncher/data/mcpelauncher/versions/`). Stažená verze se pak spouští bez Google loginu.
+3. **Ukončit dohled** v Family Link, až dítě dosáhne věku digitálního souhlasu (v ČR 15 let, jinde 13–16). Pak se účet přihlásí normálně.
+
+**Přihlášení do Xbox/Microsoft účtu ve hře** (nezaměňovat s Google loginem v launcheru) řídí **Microsoft Family Safety**, ne Google Family Link: na [family.microsoft.com](https://family.microsoft.com) → dětský účet → nastavení Xbox povolit přihlášení a hraní multiplayeru. Účet dítěte do 13 let musí mít souhlas rodiče.
+
 ### Umístění světů
 
 | Platforma | Cesta k `minecraftWorlds` |
 | --- | --- |
 | Android | `Android > data > com.mojang.minecraftpe > files > games > com.mojang > minecraftWorlds` |
 | Linux – mcpelauncher | `~/.local/share/mcpelauncher/games/com.mojang/minecraftWorlds` (flatpak: `~/.var/app/io.mrarm.mcpelauncher/data/mcpelauncher/games/com.mojang/minecraftWorlds`) |
-| Linux – GDK-Proton | `~/.local/share/bedrock-on-linux/compatdata/pfx/drive_c/users/steamuser/AppData/Roaming/Minecraft Bedrock/Users/Shared/games/com.mojang/minecraftWorlds` |
+| Linux – BedrockOnLinux / GDK-Proton | `~/.local/share/bedrock-on-linux/compatdata/pfx/drive_c/users/steamuser/AppData/Roaming/Minecraft Bedrock/Users/Shared/games/com.mojang/minecraftWorlds` |
 
 Zálohy světů jsou v [./minecraftWorlds](./minecraftWorlds).
 

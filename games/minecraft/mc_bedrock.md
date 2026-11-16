@@ -30,6 +30,35 @@ Licence Bedrocku **není přenositelná mezi obchody** (žádný cross-buy): hra
 - **Hru neaktualizovat naslepo.** Od 20. 9. 2026 hlásí launcher verzi **1.26.51.1** jako „unsupported“ ([#2044](https://github.com/minecraft-linux/mcpelauncher-manifest/issues/2044), zatím bez opravy). Zůstat na poslední verzi, která funguje, a před updatem projít [issues](https://github.com/minecraft-linux/mcpelauncher-manifest/issues).
 - Autoři negarantují další podporu: kvůli DRM se aktualizace můžou kdykoli zpozdit nebo skončit. Záložní plán: Android tablet/mobil.
 
+### Add-ony (mody) na tabletu přes USB
+
+Mody v Bedrocku = **add-ony**: dvojice *behavior pack* (BP, chování) + *resource pack* (RP, textury). Na Androidu leží v `Android > data > com.mojang.minecraftpe > files > games > com.mojang > behavior_packs` / `resource_packs`, zapnutí ve světě je v `minecraftWorlds/<id>/world_behavior_packs.json` a `world_resource_packs.json`.
+
+Seznam našich add-onů (verze, zdroje, ve kterých světech jsou): **[mc_bedrock_addons.md](./mc_bedrock_addons.md)**.
+
+Správa z Linuxu: [addons.py](./addons.py). Tablet připojit kabelem, odemknout, v notifikaci zvolit **Přenos souborů**. Skript jde přes KDE (`kioclient`, MTP), protože `kiod` drží USB spojení a `mtp-*` nástroje pak hlásí „device is busy“.
+
+```bash
+python addons.py list                       # nainstalované packy + v kolika světech jsou
+python addons.py worlds [--all]             # světy a jejich zapnuté packy
+python addons.py backup [CÍL]               # záloha packů (default ~/minecraft-backups/addons/<datum>)
+python addons.py install soubor.mcaddon     # .mcaddon / .mcpack / .zip / složka (--replace = přepsat)
+python addons.py enable <id světa> <pack>   # zapne pack i jeho BP/RP dvojče ve světě
+python addons.py disable <id světa> <pack>
+python addons.py remove <pack>              # smaže pack + dvojče a odpojí ho ze světů (ptá se)
+```
+
+`<pack>` = část názvu/složky nebo začátek UUID; svět zadávat **id složky** (spousta světů se jmenuje „Můj svět“).
+
+Pozor:
+- **Minecraft na tabletu zavřít** při zápisu, po instalaci hru restartovat.
+- MTP nezvládne paralelní čtení (data se pomíchají) ani přepsání souboru (zapisuje se smazáním + nahráním) → skript je sekvenční, `list`/`worlds` trvá ~25 s, záloha ~3 min.
+- Některé add-ony potřebují ještě zapnout **Experimenty** v nastavení světa.
+- Zbraně/mobi z odebraného add-onu ve světě zmizí; před `remove` udělat `backup` (a zálohu světa).
+- Diagnostika: chyby add-onů jsou v `com.mojang/logs/ContentLog*.txt` (stáhnout přes `kioclient copy`). Add-ony, které přepisují hráče (`minecraft:player`, `player.entity.json`), si navzájem kolidují a rozbíjí skiny – max. jeden takový na svět.
+- Svět importovaný/uložený s add-onem má **vlastní kopii packů** v `minecraftWorlds/<id>/behavior_packs` a `resource_packs` – při opravě packu vyměnit i tu.
+- **Mr. Nido's Guns** (v1.0.0) je rozbitý pro 1.26 (miliony chyb, skiny/animace hráče) → opravená verze 1.0.1 přes [fixes/fix_nido_guns.py](./fixes/fix_nido_guns.py) (11/2026). **ACT Weapons** na tabletu nefunguje (potřebuje `@minecraft/server-admin`, to je jen na dedicated serveru).
+
 ### Umístění světů
 
 | Platforma | Cesta k `minecraftWorlds` |
@@ -39,6 +68,8 @@ Licence Bedrocku **není přenositelná mezi obchody** (žádný cross-buy): hra
 | Linux – GDK-Proton | `~/.local/share/bedrock-on-linux/compatdata/pfx/drive_c/users/steamuser/AppData/Roaming/Minecraft Bedrock/Users/Shared/games/com.mojang/minecraftWorlds` |
 
 Zálohy světů jsou v [./minecraftWorlds](./minecraftWorlds).
+
+Složky světů (na tabletu i v záloze) jsou od 11/2026 přejmenované podle názvu světu (ASCII, `Můj svět` zůstávají s původním id) (název je vidět i v `levelname.txt` každé složky). Hra svět najde podle složky, přejmenování nevadí. Pozor: úložiště Androidu **nerozlišuje velká/malá písmena** (`Viki` = `VIKI`).
 
 ### Bedrock on Linux – odkazy
 

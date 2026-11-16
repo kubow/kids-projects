@@ -8,7 +8,7 @@ Poznámky a nástroje pro **Minecraft** napříč platformama.
 | --- | --- | --- | --- |
 | **[Pi Edition](./mcpi.md)** | Raspberry Pi (legacy) | Python block API, Pi ve třídě | [Streamlit app](./app.py) + `mcpi` |
 | **[Java](./mc_java.md)** | Windows, macOS, Linux | Plná hra, mody, servery, redstone | Jen poznámky k hraní/instalaci |
-| **[Bedrock](./mc_bedrock.md)** | Windows, konzole, mobily, tablety | Cross-play, Marketplace, ovladače | Jen poznámky k hraní/instalaci |
+| **[Bedrock](./mc_bedrock.md)** | Windows, konzole, mobily, tablety | Cross-play, Marketplace, ovladače | Poznámky, zálohy světů, [správa add-onů na tabletu](./addons.py), [seznam add-onů](./mc_bedrock_addons.md) |
 | **Dungeons** | Windows, konzole, mobily, tablety | Cross-play, Marketplace, ovladače |   |
 | **Legends** | Windows, konzole, mobily, tablety | Cross-play, Marketplace, ovladače |   |
 

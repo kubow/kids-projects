@@ -36,7 +36,7 @@ Mody v Bedrocku = **add-ony**: dvojice *behavior pack* (BP, chování) + *resour
 
 Seznam našich add-onů (verze, zdroje, ve kterých světech jsou): **[mc_bedrock_addons.md](./mc_bedrock_addons.md)**.
 
-Správa z Linuxu: [addons.py](./addons.py). Tablet připojit kabelem, odemknout, v notifikaci zvolit **Přenos souborů**. Skript jde přes KDE (`kioclient`, MTP), protože `kiod` drží USB spojení a `mtp-*` nástroje pak hlásí „device is busy“.
+Správa z Linuxu: [addons.py](./addons.py). Stejné příkazy s `--pc` spravují add-ony v mcpelauncheru na tomto PC (`python addons.py --pc list`). Tablet připojit kabelem, odemknout, v notifikaci zvolit **Přenos souborů**. Skript jde přes KDE (`kioclient`, MTP), protože `kiod` drží USB spojení a `mtp-*` nástroje pak hlásí „device is busy“.
 
 ```bash
 python addons.py list                       # nainstalované packy + v kolika světech jsou

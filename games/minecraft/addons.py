@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Manage Minecraft Bedrock add-ons on an Android device connected via USB.
+"""Manage Minecraft Bedrock add-ons on an Android device connected via USB,
+or (with --pc) in the local mcpelauncher install on this Linux PC.
 
 Talks to the device over MTP through KDE KIO (`kioclient`), so it works while
 Dolphin / kiod already holds the USB connection (plain libmtp tools then fail
@@ -12,10 +13,12 @@ with "device is busy").
     python addons.py remove PACK          # delete pack (+ its BP/RP pair)
     python addons.py enable WORLD PACK    # activate pack (+ pair) in a world
     python addons.py disable WORLD PACK
+    python addons.py --pc list            # same commands, local mcpelauncher
 
 PACK = part of the pack name or folder, or a UUID prefix.
 WORLD = world folder id (e.g. "TUi39f38ZLY=") or exact world name.
-Override the device path with MC_DEVICE_ROOT=mtp:/<device>/<storage>.
+Override the device path with MC_DEVICE_ROOT=mtp:/<device>/<storage>,
+the --pc game folder with MC_PC_ROOT (default: mcpelauncher, native or flatpak).
 """
 
 from __future__ import annotations
@@ -89,7 +92,19 @@ def write_json(url: str, data) -> None:
     shutil.rmtree(keep)
 
 
+PC_ROOTS = ["~/.local/share/mcpelauncher/games/com.mojang",
+            "~/.var/app/io.mrarm.mcpelauncher/data/mcpelauncher/games/com.mojang"]
+USE_PC = False
+
+
 def device_root() -> str:
+    if USE_PC:
+        cands = [os.environ["MC_PC_ROOT"]] if os.environ.get("MC_PC_ROOT") else PC_ROOTS
+        for c in cands:
+            path = Path(c).expanduser()
+            if (path / "minecraftWorlds").is_dir():
+                return "file://" + seg(str(path))
+        sys.exit("mcpelauncher game folder not found; set MC_PC_ROOT.")
     if env := os.environ.get("MC_DEVICE_ROOT"):
         return env.rstrip("/") + "/" + GAME_DIR
     devices = ls("mtp:")
@@ -152,6 +167,11 @@ def load_packs(root: str) -> list[Pack]:
     # sequential on purpose: parallel MTP reads through kiod get mixed up
     manifests = [read_json(f"{root}/{k}/{seg(f)}/manifest.json") for k, f in jobs]
     packs = [p for (k, f), m in zip(jobs, manifests) if (p := parse_manifest(m, k, f))]
+    for p in packs:  # localized name ("pack.name") -> look it up in the pack's lang file
+        if p.name == "pack.name":
+            lang = kio("cat", f"{root}/{p.kind}/{seg(p.folder)}/texts/en_US.lang", check=False)
+            m = re.search(r"(?m)^pack\.name=(.+?)\s*(?:#.*)?$", lang)
+            p.name = clean_name(m.group(1)) if m else p.folder
     by_uuid = {p.uuid: p for p in packs}
     for p in packs:  # pair = installed packs linked by dependency, either direction
         p.pair = [by_uuid[d] for d in p.deps if d in by_uuid]
@@ -325,7 +345,7 @@ def cmd_install(a) -> None:
             kio("copy", str(stage), f"{root}/{p.kind}/")
             shutil.rmtree(stage)
     if not a.dry_run:
-        print("Done. Restart Minecraft on the device, then enable the pack in a world "
+        print("Done. Restart Minecraft (device / mcpelauncher), then enable the pack in a world "
               "(game: Edit world > Behavior/Resource packs, or `addons.py enable`).")
 
 
@@ -391,6 +411,7 @@ def cmd_enable(a, enable: bool = True) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--pc", action="store_true", help="local mcpelauncher instead of the USB device")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("list", help="installed packs").set_defaults(fn=cmd_list)
     s = sub.add_parser("worlds", help="worlds and their packs")
@@ -415,6 +436,8 @@ def main() -> None:
         s.add_argument("pack")
         s.set_defaults(fn=lambda a, en=en: cmd_enable(a, en))
     a = ap.parse_args()
+    global USE_PC
+    USE_PC = a.pc
     try:
         a.fn(a)
     except RuntimeError as e:

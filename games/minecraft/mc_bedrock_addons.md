@@ -32,9 +32,9 @@ Správa stejným skriptem s přepínačem `--pc`: `python addons.py --pc list|wo
 | ThatMob's Verity (PnTMC) | 4.0.0 – V26.60 | BP + RP | `ThatMob-s-Verity-4.0.0-by-PnTMC-Add-on-V26.60.mcaddon` | ⚠️ beta (`server@2.12.0-beta`), nahradil build V26.50 (stejné UUID), ve 22 světech; kopie vložené v 17 světech vyměněny taky (záloha `~/minecraft-backups/verity-26.50-embedded-2026-11-16.tar.gz`); světy potřebují **Experimenty → Beta APIs** | [MCPEDL](https://mcpedl.com/verity-bedrock-edition/) |
 | Me Poppy Playtime | 1.0.15 | BP + RP | `Me Poppy Playtime v1.0.15.mcaddon` | ✅ 17 světů | neznámý |
 | Chikawa Mob | 1.3.1 | BP + RP | `ChikawaMob_Beh-Res_v1_3.mcaddon` | ✅ 12 světů | neznámý |
-| World Animals (+ Structures Generator) | 1.0.0 | 2× BP + RP | `World Animals Add-on.mcaddon` | ✅ | neznámý |
-| Border Expansion | 1.1.0 | BP | – (přišel s importovaným světem) | ⚠️ chybí jeho RP (`61130485…`) | neznámý |
-| Paws & Claws: Rodent Companions | 1.3.9 | jen RP | `PawsClaws_RodentCompanions_1.3.9_RP.mcpack` | ⚠️ chybí BP, nepoužitý | neznámý |
+| World Animals (+ Structures Generator) | 1.0.0 | 2× BP + RP | `World Animals Add-on.mcaddon` | ✅ 5 světů; RP chyběl ve všech, doplněn 23. 11. | neznámý |
+| Border Expansion (AngrySalt) | 1.1.0 | BP | `Fix.mcaddon` = CurseForge soubor „Latest Version Fix“ (7. 8. 2025, pro 1.21.100); kopie `Border-Expansion-1.1.0-BP.mcpack` | ⚠️ manifest chce RP `61130485…`, který v tomto souboru není – zkusit „Initial Release“ (29. 7. 2025) | [CurseForge](https://www.curseforge.com/minecraft-bedrock/addons/border-expansion) |
+| Paws & Claws: Rodent Companions (Iced_Fox_Studios) | 1.3.9 | jen RP | `PawsClaws_RodentCompanions_1.3.9_RP.mcpack` = CurseForge „RS Pack V1.3.9“ | ⚠️ chybí BP = „BH Pack V1.3.9“ (soubor 9271035, 20. 10. 2026, pro 26.50) → stáhnout ručně (velké tlačítko Download na CurseForge dává vždy RP; spolehlivěji web autora); bez závislostí; nepoužitý | [CurseForge](https://www.curseforge.com/minecraft-bedrock/addons/paws-claws-rodent-companions) · [Iced Fox – BH 1.3.9](https://www.icedfoxstudios.com/downloads/c8365f18-9143-4852-9974-c71eae2e4c2d) |
 | The Sift WE 0.9 | 1.0.1 | RP | `The-Sift-WE-0.9-RP.mcpack` | ⚪ nepoužitý | neznámý |
 | Kittens (MCTools) | 1.0.0 | skin pack | `../Packs/Kittens.mcpack` | ✅ | neznámý |
 | Furniture Craft | 1.0.0 | BP + RP | `Furniture_Craft.mcaddon` | ✅ nainstalováno 16. 11. | [MCPEDL](https://mcpedl.com/furniture-craft/) |

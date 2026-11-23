@@ -57,6 +57,7 @@ Pozor:
 - Zbraně/mobi z odebraného add-onu ve světě zmizí; před `remove` udělat `backup` (a zálohu světa).
 - Diagnostika: chyby add-onů jsou v `com.mojang/logs/ContentLog*.txt` (stáhnout přes `kioclient copy`). Add-ony, které přepisují hráče (`minecraft:player`, `player.entity.json`), si navzájem kolidují a rozbíjí skiny – max. jeden takový na svět.
 - Svět importovaný/uložený s add-onem má **vlastní kopii packů** v `minecraftWorlds/<id>/behavior_packs` a `resource_packs` – při opravě packu vyměnit i tu.
+- **Verity stojí a neodpovídá** = svět nemá **Experimenty → Beta APIs**. Chůze, honička i chat jsou celé ve skriptech (`@minecraft/server 2.12.0-beta`), bez experimentu se skripty potichu nenačtou. Oprava hromadně (hra zavřená): `python fixes/enable_beta_apis.py --pack ef21cad0-f70e-4629-ae48-6e7627aacef7` (záloha `level.dat.bak-beta-apis`). Ve světě to pak nejde vypnout (17. 11. 2026).
 - **Mr. Nido's Guns** (v1.0.0) je rozbitý pro 1.26 (miliony chyb, skiny/animace hráče) → opravená verze 1.0.1 přes [fixes/fix_nido_guns.py](./fixes/fix_nido_guns.py) (11/2026). **ACT Weapons** na tabletu nefunguje (potřebuje `@minecraft/server-admin`, to je jen na dedicated serveru).
 
 ### mcpelauncher a dětský účet (Google Family Link)
